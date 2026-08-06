@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Hồ Sơ Bệnh Án</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .custom-card { background: #fff; border-radius: 16px; border: 1px solid #e3e6f0; }
+        .patient-item { cursor: pointer; border-radius: 12px; transition: all 0.2s; }
+        .patient-item:hover, .patient-item.active { background-color: #eef2ff; }
+        .avatar-circle { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #fff; }
+        .fs-7 { font-size: 0.875rem; }
+        .fs-8 { font-size: 0.75rem; }
+    </style>
+</head>
+<body class="p-4">
+
+    <div class="container-fluid">
+        <!-- HEADER -->
+        <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded-3 shadow-sm">
+            <div class="d-flex align-items-center gap-3">
+                <a th:href="@{/bac_si}" class="btn btn-outline-secondary btn-sm rounded-2">
+                    <i class="fa-solid fa-arrow-left me-1"></i> Quay lại
+                </a>
+                <h5 class="fw-bold text-dark mb-0">Quản Lý Hồ Sơ Bệnh Án 📁</h5>
+            </div>
+        </div>
+
+        <div class="row g-3">
+            <!-- CỘT TRÁI: DANH SÁCH BỆNH NHÂN -->
+            <div class="col-md-4 col-lg-3">
+                <div class="custom-card p-3 shadow-sm">
+                    <form th:action="@{/bac_si/ho_so_benh_an}" method="get" class="mb-3" id="searchForm">
+                        <div class="input-group input-group-sm mb-2">
+                            <input type="text" id="keywordInput" name="keyword" class="form-control shadow-none" placeholder="Tìm tên, Mã BN, SĐT..." th:value="${keyword}">
+                            <button class="btn btn-outline-secondary" type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
+                        </div>
+                        <label class="form-label fs-8 text-muted mb-1">Lọc theo ngày khám:</label>
+                        <input type="date" id="dateInput" name="date" class="form-control form-control-sm shadow-none" th:value="${selectedDate}" onchange="this.form.submit()">
+                    </form>
+
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <small class="fw-bold text-secondary text-uppercase fs-8">DANH SÁCH BỆNH NHÂN</small>
+                        <span class="badge bg-primary rounded-pill" th:text="${patients != null ? #lists.size(patients) + ' bệnh nhân' : '0 bệnh nhân'}">0 bệnh nhân</span>
+                    </div>
+
+                    <!-- DANH SÁCH BỆNH NHÂN TỪ DATABASE -->
+                    <div class="patient-list overflow-auto" style="max-height: 500px;">
+                        
+                        <div th:if="${patients == null or #lists.isEmpty(patients)}" class="text-center text-muted py-4 fs-7">
+                            Chưa có hồ sơ bệnh nhân nào.
+                        </div>
+
+                        <div th:each="patient : ${patients}" 
+                             th:classappend="${selectedPatientId == patient.id} ? 'active' : ''" 
+                             class="patient-item p-2 d-flex align-items-center gap-2 mb-1"
+                             th:onclick="'selectPatient(' + ${patient.id} + ')'">
+                            <div class="avatar-circle bg-primary" th:text="${patient.initials != null ? patient.initials : 'BN'}">BN</div>
+                            <div class="flex-grow-1 overflow-hidden">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="fw-bold text-dark text-truncate fs-7" th:text="${patient.fullName}">Tên BN</span>
+                                    <small class="text-muted fs-8" th:text="${patient.lastVisitDate}">Ngày</small>
+                                </div>
+                                <small class="text-muted d-block fs-8" th:text="${(patient.code != null ? patient.code : 'BN') + ' | ' + (patient.phone != null ? patient.phone : '-')}">Mã BN | SĐT</small>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- CỘT PHẢI: CHI TIẾT HỒ SƠ BỆNH ÁN -->
+            <div class="col-md-8 col-lg-9">
+                
+                <div th:if="${selectedPatient == null}" class="custom-card p-5 text-center shadow-sm">
+                    <i class="fa-solid fa-user-slash text-muted fs-1 mb-3"></i>
+                    <h6 class="text-muted">Vui lòng chọn một bệnh nhân từ danh sách bên trái để xem hồ sơ bệnh án.</h6>
+                </div>
+
+                <div th:if="${selectedPatient != null}" class="custom-card p-4 shadow-sm">
+                    <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="avatar-circle bg-primary fs-5" style="width: 50px; height: 50px;" th:text="${selectedPatient.initials != null ? selectedPatient.initials : 'BN'}">BN</div>
+                            <div>
+                                <h5 class="fw-bold mb-0 text-dark" th:text="${selectedPatient.fullName}">Tên Bệnh Nhân</h5>
+                                <small class="text-muted" th:text="${(selectedPatient.gender != null ? selectedPatient.gender : 'Nam/Nữ') + ' - ' + (selectedPatient.age != null ? selectedPatient.age : '0') + ' tuổi | SĐT: ' + (selectedPatient.phone != null ? selectedPatient.phone : '-')}">Thông tin BN</small>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-light text-dark border p-2" th:text="'Mã BN: ' + ${selectedPatient.code}">Mã BN</span>
+                            <button class="btn btn-primary btn-sm rounded-2" th:onclick="'createMedicalRecord(' + ${selectedPatient.id} + ')'"><i class="fa-solid fa-plus me-1"></i> Tạo lượt khám mới</button>
+                        </div>
+                    </div>
+
+                    <!-- BẢNG LỊCH SỬ KHÁM -->
+                    <h6 class="fw-bold text-secondary text-uppercase mb-3 fs-7">LỊCH SỬ KHÁM BỆNH</h6>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Ngày khám</th>
+                                    <th>Bác sĩ khám</th>
+                                    <th>Lý do khám</th>
+                                    <th>Chẩn đoán</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:if="${medicalRecords == null or #lists.isEmpty(medicalRecords)}">
+                                    <td colspan="5" class="text-center text-muted py-4">Bệnh nhân này chưa có lịch sử khám bệnh.</td>
+                                </tr>
+                                <tr th:each="record : ${medicalRecords}">
+                                    <td th:text="${record.visitDate}">01/01/2026</td>
+                                    <td th:text="${record.doctorName}">BS. Nguyễn Minh Đức</td>
+                                    <td th:text="${record.reason}">Lý do</td>
+                                    <td th:text="${record.diagnosis}">Chẩn đoán</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary rounded-2 fw-bold" 
+                                                th:onclick="'viewPrescription(' + ${record.id} + ')'">
+                                            <i class="fa-solid fa-pills me-1"></i>Xem đơn thuốc
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL XEM CHI TIẾT ĐƠN THUỐC -->
+    <div class="modal fade" id="prescriptionModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title fw-bold" id="prescriptionModalTitle"><i class="fa-solid fa-prescription-bottle-medical me-2"></i>Đơn Thuốc Bệnh Nhân</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="p-3 bg-light rounded-3 mb-3 border">
+                        <div class="mb-1"><b>Chẩn đoán:</b> <span id="modalDiagnosis" class="text-danger fw-bold">--</span></div>
+                        <div><b>Ngày tái khám:</b> <span id="modalRevisitDate" class="text-dark">--</span></div>
+                    </div>
+                    <h6 class="fw-bold text-success mb-2"><i class="fa-solid fa-list-check me-1"></i>Chi tiết đơn thuốc:</h6>
+                    <div id="modalPrescriptionContent" class="p-3 bg-white border rounded-3 text-dark fs-7" style="white-space: pre-line; min-height: 100px;">
+                        Đang tải đơn thuốc...
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary btn-sm rounded-2" data-bs-dismiss="modal">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let prescriptionModal;
+        document.addEventListener("DOMContentLoaded", function() {
+            prescriptionModal = new bootstrap.Modal(document.getElementById('prescriptionModal'));
+        });
+
+        function selectPatient(patientId) {
+            const keyword = document.getElementById('keywordInput').value.trim();
+            const date = document.getElementById('dateInput').value;
+            
+            let url = '/bac_si/ho_so_benh_an?patientId=' + patientId;
+            if (keyword) url += '&keyword=' + encodeURIComponent(keyword);
+            if (date) url += '&date=' + encodeURIComponent(date);
+            
+            window.location.href = url;
+        }
+
+        function createMedicalRecord(patientId) {
+            window.location.href = '/bac_si/ho_so_benh_an/create?patientId=' + patientId;
+        }
+
+        function viewPrescription(recordId) {
+            document.getElementById('modalDiagnosis').innerText = 'Đang tải...';
+            document.getElementById('modalRevisitDate').innerText = 'Đang tải...';
+            document.getElementById('modalPrescriptionContent').innerText = 'Đang tải chi tiết đơn thuốc...';
+
+            prescriptionModal.show();
+
+            fetch('/api/ho-so-benh-an/' + recordId)
+                .then(res => {
+                    if (!res.ok) throw new Error("Không thể lấy dữ liệu đơn thuốc");
+                    return res.json();
+                })
+                .then(data => {
+                    document.getElementById('modalDiagnosis').innerText = data.chanDoan || data.diagnosis || 'Chưa cập nhật';
+                    document.getElementById('modalRevisitDate').innerText = data.ngayTaiKham || data.revisitDate || 'Không hẹn tái khám';
+                    document.getElementById('modalPrescriptionContent').innerText = data.donThuoc || data.prescription || 'Chưa có chi tiết đơn thuốc.';
+                })
+                .catch(err => {
+                    console.error("Lỗi:", err);
+                    document.getElementById('modalDiagnosis').innerText = 'Lỗi dữ liệu';
+                    document.getElementById('modalRevisitDate').innerText = 'Lỗi dữ liệu';
+                    document.getElementById('modalPrescriptionContent').innerHTML = '<span class="text-danger"><i class="fa-solid fa-triangle-exclamation me-1"></i> Không thể tải thông tin đơn thuốc từ hệ thống.</span>';
+                });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,273 @@
+/* Tổng thể trang */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+}
+
+/* Phần Banner xanh dương (Chứa Slogan và Ảnh trang chủ) */
+.main-wrapper {
+    background-color: #0077c2;
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+/* Nút quay lại nền xanh, chữ trắng */
+.menu-nav {
+    padding: 15px 20px;
+    background-color: #0077c2;
+    display: flex;
+    align-items: center;
+}
+
+.back-link {
+    color: white !important;
+    font-size: 20px;
+    font-weight: bold;
+    text-decoration: none;
+    font-family: Arial, sans-serif;
+    display: block;
+    text-align: left;
+}
+
+.back-link:hover {
+    text-decoration: underline;
+}
+
+/* Slogan màu vàng */
+.slogan-vang { 
+    color: #ffd700; 
+    font-size: 36px; 
+    font-weight: bold; 
+    margin: 20px 0; 
+}
+
+/* Ảnh banner */
+.banner-img img { 
+    width: 100%; 
+    max-width: 800px; 
+    border-radius: 10px; 
+    margin-bottom: 20px; 
+}
+
+/* Tiêu đề trang */
+.tieu-de-trang { 
+    color: #333; 
+    text-align: center; 
+    margin-top: 40px; 
+}
+
+/* Container chứa 5 cột khoa thế mạnh */
+.khoa-container {
+    display: flex !important;
+    justify-content: space-between !important;
+    gap: 15px !important;
+    margin: 30px auto !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 0 15px !important;
+}
+
+.khoa-item {
+    flex: 1 !important;
+    background-color: #ffffff !important; 
+    border: 1px solid #e0e0e0 !important;
+    border-radius: 12px !important;
+    padding: 20px 10px !important;
+    text-align: center !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    transition: all 0.3s ease;
+}
+
+.khoa-icon {
+    font-size: 32px !important;
+    margin-bottom: 12px !important;
+}
+
+.khoa-item strong {
+    color: #0077c2 !important; 
+    font-size: 15px !important;
+    display: block !important;
+    margin-bottom: 8px !important;
+    font-weight: bold !important;
+}
+
+.khoa-item p {
+    color: #444 !important;
+    font-size: 12px !important;
+    line-height: 1.4 !important;
+    margin: 0 !important;
+}
+
+.khoa-item:hover {
+    transform: translateY(-5px);
+    background-color: #f0f8ff !important;
+    border-color: #0077c2 !important;
+    box-shadow: 0 6px 18px rgba(0,119,194,0.15) !important;
+}
+
+/* Container giới thiệu chia 2 cột (Đã fix mất đường kẻ/vệt xám) */
+.gioi-thieu-container {
+    display: flex;
+    max-width: 1200px;
+    padding: 40px;
+    gap: 30px;
+    align-items: center;
+    background-color: #ffffff;
+    border-radius: 15px 15px 0 0;
+}
+
+.text-content { 
+    flex: 1; 
+    color: #0077c2; 
+    font-size: 18px; 
+    line-height: 1.6; 
+}
+
+.image-content { 
+    flex: 1; 
+}
+
+.image-content img { 
+    width: 100%; 
+    border-radius: 10px; 
+    display: block;
+}
+
+/* 3 ảnh công nghệ */
+.anh-cong-nghe-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    margin-top: 20px;
+    padding-bottom: 50px;
+}
+
+.anh-cong-nghe-container img {
+    flex: 1;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+/* Phần footer nền xanh */
+.footer-xanh {
+    background-color: #0077c2;
+    color: white;
+    padding: 40px;
+    margin-top: 30px;
+}
+
+.lich-lam-viec {
+    display: flex;
+    justify-content: space-around;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+/* chuyên khoa 
+/* Menu cha */
+nav ul{
+    list-style:none;
+    margin:0;
+    padding:0;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+nav ul li{
+    position:relative;
+    margin:0 15px;
+}
+
+/* Menu chính */
+nav ul li>a{
+    display:block;
+    padding:12px 22px;
+    background:#0077c2;
+    color:#fff;
+    text-decoration:none;
+    border-radius:8px;
+}
+
+/* Menu con */
+/* Menu con */
+.dropdown-menu{
+    display:none !important;
+    position:absolute;
+    top: 100%;
+    left: 0;
+    margin-top: 0 !important; /* Xóa khoảng hở giữa nút và menu */
+    z-index: 9999 !important; /* Giúp menu luôn nổi trên cùng */
+
+    width:220px;
+    background:#fff;
+
+    padding:0;
+    margin:0;
+    list-style:none;
+
+    border:1px solid #ddd;
+    box-shadow:0 4px 12px rgba(0,0,0,.15);
+}
+
+
+/* Tạo cầu nối ẩn chống mất hover khi di chuyển chuột */
+.dropdown-menu::before {
+    content: "";
+    position: absolute;
+    top: -10px;
+    left: 0;
+    width: 100%;
+    height: 10px;
+}
+
+/* Hiện menu khi hover vào nút CHA HOẶC bản thân MENU CON */
+.dropdown:hover > .dropdown-menu,
+.dropdown-menu:hover {
+    display: block !important;
+}
+
+/* Menu con KHÔNG phải nút */
+.dropdown-menu li{
+    margin:0;
+}
+
+.dropdown-menu li a{
+    display:block;
+    padding:12px 18px;
+
+    background:transparent !important;
+    color:#333 !important;
+    border-radius:0 !important;
+    text-decoration:none;
+}
+
+.dropdown-menu li a:hover{
+    background:#f2f2f2 !important;
+    color:#0077c2 !important;
+}
+/* khoa noi
+/* --- THANH QUAY LẠI TRANG CHỦ --- */
+        .back-home-bar {
+            background-color: var(--blue-main);
+            padding: 12px 20px;
+        }
+        .back-home-bar a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 16px;
+            display: inline-block;
+            transition: 0.2s;
+        }
+        .back-home-bar a:hover {
+            opacity: 0.8;
+            text-decoration: underline;
+        }

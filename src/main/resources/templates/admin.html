@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang Quản Trị Admin - Phòng Khám</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <style>
+        body {
+            background-color: #f4f6f9;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .sidebar {
+            width: 260px;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #1e293b;
+            color: #fff;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+        .sidebar .brand {
+            padding: 20px 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-bottom: 1px solid #334155;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .sidebar .nav-link {
+            color: #94a3b8;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+            border-radius: 0;
+            transition: all 0.2s;
+        }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            color: #ffffff;
+            background-color: #0f172a;
+            border-left: 4px solid #0d6efd;
+        }
+        .main-content {
+            margin-left: 260px;
+            padding: 20px 30px;
+        }
+        .stat-card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        }
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+
+<!-- 1. SIDEBAR CỘT BÊN TRÁI -->
+    <div class="sidebar d-flex flex-column justify-content-between p-3 bg-dark text-white" style="min-width: 250px; min-height: 100vh;">
+        <div>
+            <div class="brand text-primary fs-4 fw-bold mb-4 d-flex align-items-center gap-2">
+                <i class="bi bi-hospital fs-3 text-success"></i>
+                <span class="text-white">Phòng Khám An Tâm</span>
+            </div>
+            
+            <div class="nav flex-column nav-pills gap-2" id="v-pills-tab" role="tablist">
+                <button class="nav-link active text-start text-white" id="tab-home-btn" data-bs-toggle="pill" data-bs-target="#tab-home" type="button" role="tab">
+                    <i class="bi bi-house-door me-2"></i> Trang Chủ
+                </button>
+                <button class="nav-link text-start text-white" id="tab-lichkham-btn" data-bs-toggle="pill" data-bs-target="#tab-lichkham" type="button" role="tab">
+                    <i class="bi bi-calendar-check me-2"></i> Quản Lý Lịch Khám
+                </button>
+                <button class="nav-link text-start text-white" id="tab-chuyenkhoa-btn" data-bs-toggle="pill" data-bs-target="#tab-chuyenkhoa" type="button" role="tab">
+                    <i class="bi bi-folder2-open me-2"></i> Danh Sách Chuyên Khoa
+                </button>
+                <button class="nav-link text-start text-white" id="tab-bacsi-btn" data-bs-toggle="pill" data-bs-target="#tab-bacsi" type="button" role="tab">
+                    <i class="bi bi-person-badge me-2"></i> Quản Lý Bác Sĩ
+                </button>
+                <button class="nav-link text-start text-white" id="tab-taikhoan-btn" data-bs-toggle="pill" data-bs-target="#tab-taikhoan" type="button" role="tab">
+                    <i class="bi bi-people me-2"></i> Quản Lý Tài Khoản
+                </button>
+            </div>
+        </div>
+
+        <div class="pt-3 border-top border-secondary">
+            <a th:href="@{/admin/logout}" class="btn btn-outline-danger btn-sm w-100">
+                <i class="fa-solid fa-right-from-bracket me-1"></i> Đăng xuất Admin
+            </a>
+        </div>
+    </div>
+
+    <!-- 2. KHU VỰC NỘI DUNG CHÍNH (MAIN CONTENT) -->
+    <div class="main-content flex-grow-1 p-4">
+
+        <!-- HEADER TRÊN CÙNG -->
+        <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom bg-white p-3 rounded shadow-sm">
+            <h4 class="fw-bold mb-0 text-secondary">Trang chủ Admin - Hệ Thống Quản Lý Phòng Khám</h4>
+            <div class="d-flex align-items-center gap-3">
+                <span class="fw-bold"><i class="bi bi-person-circle me-1"></i> Xin chào, <strong>Admin</strong></span>
+            </div>
+        </div>
+
+        <!-- THÔNG BÁO LỖI HỆ THỐNG -->
+        <div th:if="${param.error != null}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:if="${param.error[0] == 'CannotDeleteDoctor'}">❌ Không thể xóa Bác sĩ này do đã có dữ liệu lịch khám liên quan!</span>
+            <span th:if="${param.error[0] == 'CannotDeleteUser'}">❌ Không thể xóa Tài khoản này do đã có dữ liệu giao dịch/lịch sử khám!</span>
+            <span th:if="${param.error[0] == 'DuplicateNguoiDung'}">❌ ID Tài khoản này đã được phân công làm Bác sĩ rồi!</span>
+            <span th:if="${param.error[0] == 'NguoiDungNotFound'}">❌ Không tìm thấy ID Tài khoản người dùng này!</span>
+            <span th:if="${param.error[0] == 'EmailAlreadyExists'}">❌ Email này đã tồn tại trong hệ thống!</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- NỘI DUNG CÁC TAB -->
+        <div class="tab-content" id="v-pills-tabContent">
+            
+            <!-- ================= TAB 1: TRANG CHỦ ================= -->
+            <div class="tab-pane fade show active" id="tab-home" role="tabpanel">
+                <h5 class="fw-bold mb-3">Tổng Quan Giao Diện</h5>
+                
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <div class="card stat-card p-3 bg-white shadow-sm border-0">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="stat-icon bg-success bg-opacity-10 text-success p-3 rounded">
+                                    <i class="bi bi-clock-history fs-3"></i>
+                                </div>
+                                <div>
+                                    <small class="text-muted fw-bold">Tổng số Lịch Khám</small>
+                                    <h3 class="fw-bold mb-0" th:text="${dsLichKham != null ? #lists.size(dsLichKham) : 0} + ' Lịch'">0 Lịch</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="card stat-card p-3 bg-white shadow-sm border-0">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="stat-icon bg-primary bg-opacity-10 text-primary p-3 rounded">
+                                    <i class="bi bi-person-plus fs-3"></i>
+                                </div>
+                                <div>
+                                    <small class="text-muted fw-bold">Bệnh nhân</small>
+                                    <h3 class="fw-bold mb-0" th:text="${dsNguoiDung != null ? #lists.size(dsNguoiDung.?[vaiTro.name() == 'BENH_NHAN']) : 0}">0</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="card stat-card p-3 bg-white shadow-sm border-0">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="stat-icon bg-info bg-opacity-10 text-info p-3 rounded">
+                                    <i class="bi bi-person-badge fs-3"></i>
+                                </div>
+                                <div>
+                                    <small class="text-muted fw-bold">Tổng số Bác sĩ</small>
+                                    <h3 class="fw-bold mb-0" th:text="${dsBacSi != null ? #lists.size(dsBacSi) : 0}">0</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= TAB 2: QUẢN LÝ LỊCH KHÁM ================= -->
+            <div class="tab-pane fade" id="tab-lichkham" role="tabpanel">
+                <div class="card shadow border-0">
+                    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                        <h5 class="m-0 text-primary fw-bold">📅 Danh Sách Lịch Khám Toàn Hệ Thống</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Mã LK</th>
+                                    <th>Bệnh Nhân</th>
+                                    <th>Số Điện Thoại</th>
+                                    <th>Chuyên Khoa ID</th>
+                                    <th>Ngày / Giờ Khám</th>
+                                    <th>Trạng Thái</th>
+                                    <th class="text-center" width="15%">Hành Động</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="lk : ${dsLichKham}">
+                                    <td class="fw-bold" th:text="${'LK' + lk.id}">LK1001</td>
+                                    <td class="fw-bold text-dark" th:text="${lk.hoTenBenhNhan != null ? lk.hoTenBenhNhan : 'Chưa có tên'}">Nguyễn Văn A</td>
+                                    <td th:text="${lk.soDienThoai != null ? lk.soDienThoai : '-'}">0987654321</td>
+                                    <td>
+                                        <span class="badge bg-info text-dark" th:text="${lk.chuyenKhoaId != null ? 'Khoa #' + lk.chuyenKhoaId : '-'}">Khoa #1</span>
+                                    </td>
+                                    <td>
+                                        <span th:text="${lk.gioKham != null ? lk.gioKham : ''}">09:00</span> - 
+                                        <span th:text="${lk.ngayKham != null ? lk.ngayKham : ''}">15/10/2026</span>
+                                    </td>
+                                    <td>
+                                        <span th:if="${lk.trangThai == null || lk.trangThai == 'CHO_XAC_NHAN'}" class="badge bg-warning text-dark">Chờ xác nhận</span>
+                                        <span th:if="${lk.trangThai == 'DA_XAC_NHAN'}" class="badge bg-primary">Đã xác nhận</span>
+                                        <span th:if="${lk.trangThai == 'HOAN_THANH'}" class="badge bg-success">Hoàn thành</span>
+                                        <span th:if="${lk.trangThai == 'DA_HUY'}" class="badge bg-danger" th:title="${lk.lyDoHuy}">Đã hủy</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-info fw-bold" 
+                                                    data-bs-toggle="modal" 
+                                                    th:data-bs-target="${'#modalChiTiet' + lk.id}">
+                                                xem
+                                            </button>
+                                            <a th:href="@{'/admin/lich-kham/xoa/' + ${lk.id}}" 
+                                               class="btn btn-outline-danger"
+                                               onclick="return confirm('Bạn có chắc chắn muốn xóa/hủy lịch khám này?');">
+                                                Xóa
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(dsLichKham)}">
+                                    <td colspan="7" class="text-center text-muted py-4">
+                                        <em>Chưa có dữ liệu lịch khám nào trong hệ thống.</em>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- MODAL CHI TIẾT LỊCH KHÁM -->
+                <div th:each="lk : ${dsLichKham}">
+                    <div class="modal fade" th:id="${'modalChiTiet' + lk.id}" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-lg text-start">
+                            <div class="modal-content">
+                                <div class="modal-header bg-primary text-white">
+                                    <h5 class="modal-title fw-bold">📋 Chi Tiết Hồ Sơ Lịch Khám #LK<span th:text="${lk.id}"></span></h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <div class="p-3 border rounded bg-light h-100">
+                                                <h6 class="fw-bold text-primary mb-2">👤 Thông Tin Bệnh Nhân</h6>
+                                                <p class="mb-1"><strong>Họ tên:</strong> <span th:text="${lk.hoTenBenhNhan != null ? lk.hoTenBenhNhan : 'Chưa cập nhật'}"></span></p>
+                                                <p class="mb-1"><strong>Email:</strong> <span th:text="${lk.email != null ? lk.email : '-'}"></span></p>
+                                                <p class="mb-1"><strong>Số điện thoại:</strong> <span th:text="${lk.soDienThoai != null ? lk.soDienThoai : '-'}"></span></p>
+                                                <p class="mb-0"><strong>Giới tính:</strong> <span th:text="${lk.gioiTinh != null ? lk.gioiTinh : '-'}"></span></p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="p-3 border rounded bg-light h-100">
+                                                <h6 class="fw-bold text-primary mb-2">👨‍⚕️ Thông Tin Dịch Vụ</h6>
+                                                <p class="mb-1"><strong>Mã Chuyên Khoa:</strong> <span class="badge bg-secondary" th:text="${lk.chuyenKhoaId != null ? lk.chuyenKhoaId : '-'}"></span></p>
+                                                <p class="mb-1"><strong>Bác Sĩ ID:</strong> <span th:text="${lk.bacSiId != null ? lk.bacSiId : 'Phòng khám tự xếp'}"></span></p>
+                                                <p class="mb-0"><strong>Địa chỉ bệnh nhân:</strong> <span th:text="${lk.diaChi != null ? lk.diaChi : '-'}"></span></p>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="p-3 border rounded">
+                                                <h6 class="fw-bold text-primary mb-2">⏰ Thời Gian Khám</h6>
+                                                <div class="d-flex flex-wrap gap-4">
+                                                    <p class="mb-0"><strong>Ngày khám:</strong> <span th:text="${lk.ngayKham != null ? lk.ngayKham : '-'}"></span></p>
+                                                    <p class="mb-0"><strong>Giờ khám:</strong> <span th:text="${lk.gioKham != null ? lk.gioKham : '-'}"></span></p>
+                                                    <p class="mb-0">
+                                                        <strong>Trạng thái:</strong> 
+                                                        <span th:if="${lk.trangThai == null || lk.trangThai == 'CHO_XAC_NHAN'}" class="badge bg-warning text-dark">Chờ xác nhận</span>
+                                                        <span th:if="${lk.trangThai == 'DA_XAC_NHAN'}" class="badge bg-primary">Đã xác nhận</span>
+                                                        <span th:if="${lk.trangThai == 'HOAN_THANH'}" class="badge bg-success">Hoàn thành</span>
+                                                        <span th:if="${lk.trangThai == 'DA_HUY'}" class="badge bg-danger">Đã hủy</span>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="p-3 border rounded bg-warning bg-opacity-10">
+                                                <h6 class="fw-bold text-dark mb-2">🩺 Lý Do Khám / Triệu Chứng</h6>
+                                                <div class="p-2 bg-white rounded border" th:text="${lk.lyDoKham != null && !lk.lyDoKham.isEmpty() ? lk.lyDoKham : 'Không có mô tả lý do khám'}"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= TAB 3: QUẢN LÝ CHUYÊN KHOA ================= -->
+            <div class="tab-pane fade" id="tab-chuyenkhoa" role="tabpanel">
+                <div class="card shadow border-0">
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+                        <h5 class="m-0 text-primary fw-bold">📁 Danh Sách Chuyên Khoa</h5>
+                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalThemCK">
+                            + Thêm Chuyên Khoa
+                        </button>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table table-bordered table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th width="8%">ID</th>
+                                    <th width="25%">Tên Chuyên Khoa</th>
+                                    <th width="52%">Mô Tả</th>
+                                    <th width="15%" class="text-center">Hành Động</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="ck : ${dsChuyenKhoa}">
+                                    <td th:text="${ck.id}">1</td>
+                                    <td class="fw-bold" th:text="${ck.tenChuyenKhoa}">Nội Khoa</td>
+                                    <td th:text="${ck.moTa}">Khám nội khoa...</td>
+                                    <td class="text-center">
+                                        <a th:href="@{/admin/chuyen-khoa/xoa/{id}(id=${ck.id})}" 
+                                           class="btn btn-danger btn-sm"
+                                           onclick="return confirm('Bạn có chắc chắn muốn xóa chuyên khoa này?');">
+                                            🗑️ Xóa
+                                        </a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- MODAL THÊM CHUYÊN KHOA -->
+                <div class="modal fade" id="modalThemCK" tabindex="-1" aria-labelledby="modalThemCKLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <form th:action="@{/admin/chuyen-khoa/them}" th:object="${chuyenKhoaMoi}" method="post">
+                                <div class="modal-header">
+                                    <h5 class="modal-title fw-bold text-primary" id="modalThemCKLabel">Thêm Chuyên Khoa Mới</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Tên Chuyên Khoa <span class="text-danger">*</span></label>
+                                        <input type="text" th:field="*{tenChuyenKhoa}" class="form-control" placeholder="Nhập tên chuyên khoa..." required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Mô Tả</label>
+                                        <textarea th:field="*{moTa}" class="form-control" rows="3" placeholder="Nhập mô tả ngắn..."></textarea>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy</button>
+                                    <button type="submit" class="btn btn-primary btn-sm">Lưu Chuyên Khoa</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= TAB 4: QUẢN LÝ BÁC SĨ ================= -->
+            <div class="tab-pane fade" id="tab-bacsi" role="tabpanel">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="text-primary fw-bold mb-0">🏥 Quản Lý Hồ Sơ Bác Sĩ Theo Chuyên Khoa</h5>
+                </div>
+
+                <div th:each="ck : ${dsChuyenKhoa}" class="card shadow-sm mb-4 border-start border-4 border-primary border-0">
+                    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            📂 Chuyên Khoa: <span class="text-uppercase" th:text="${ck.tenChuyenKhoa}">Nội Khoa</span>
+                        </h6>
+                        <span class="badge bg-info text-dark" 
+                              th:text="${#lists.size(dsBacSi.?[chuyenKhoa != null && chuyenKhoa.id == #vars.ck.id])} + ' Bác sĩ'">
+                            0 Bác sĩ
+                        </span>
+                    </div>
+                    
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th width="8%" class="ps-3">ID BS</th>
+                                        <th width="22%">Họ Và Tên Bác Sĩ</th>
+                                        <th width="15%">Học Vị</th>
+                                        <th width="35%">Mô Tả Kinh Nghiệm</th>
+                                        <th width="20%" class="text-center">Hành Động</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="bs : ${dsBacSi}" th:if="${bs.chuyenKhoa != null && bs.chuyenKhoa.id == ck.id}">
+                                        <td class="ps-3" th:text="${bs.id}">1</td>
+                                        <td>
+                                            <strong class="text-primary" th:text="${bs.hoTen != null ? bs.hoTen : 'Chưa cập nhật tên'}">BS. Nguyễn Văn A</strong>
+                                            <br>
+                                            <small class="text-muted" th:text="${bs.email != null ? bs.email : ''}"></small>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-info-subtle text-info border border-info" th:text="${bs.hocVi != null ? bs.hocVi : 'Bác sĩ'}">Thạc sĩ</span>
+                                        </td>
+                                        <td th:text="${bs.moTa != null ? bs.moTa : 'Chưa cập nhật mô tả...'}">Mô tả kinh nghiệm...</td>
+                                        <td class="text-center">
+                                            <button class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="modal" th:data-bs-target="'#modalSuaBS_' + ${bs.id}">
+                                                ✏️ Sửa
+                                            </button>
+                                            <a th:href="@{/admin/bac-si/xoa/{id}(id=${bs.id})}" class="btn btn-outline-danger btn-sm" onclick="return confirm('Bạn có chắc chắn muốn xóa hồ sơ bác sĩ này?');">
+                                                🗑️ Xóa
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    <tr th:if="${#lists.isEmpty(dsBacSi.?[chuyenKhoa != null && chuyenKhoa.id == #vars.ck.id])}">
+                                        <td colspan="5" class="text-center text-muted py-3">
+                                            <em>Chuyên khoa này hiện chưa có bác sĩ nào.</em>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MODAL SỬA HỒ SƠ BÁC SĨ -->
+                <div th:each="bs : ${dsBacSi}">
+                    <div class="modal fade text-start" th:id="'modalSuaBS_' + ${bs.id}" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <form th:action="@{/admin/bac-si/cap-nhat}" method="post">
+                                    <input type="hidden" name="id" th:value="${bs.id}" />
+                                    <div class="modal-header bg-primary text-white">
+                                        <h5 class="modal-title fw-bold">✏️ Cập Nhật Hồ Sơ Bác Sĩ</h5>
+                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Bác sĩ:</label>
+                                            <input type="text" class="form-control bg-light" th:value="${bs.hoTen != null ? bs.hoTen : ''}" readonly>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Chuyên Khoa Công Tác <span class="text-danger">*</span></label>
+                                            <select name="chuyenKhoaId" class="form-select" required>
+                                                <option th:each="c : ${dsChuyenKhoa}" 
+                                                        th:value="${c.id}" 
+                                                        th:text="${c.tenChuyenKhoa}"
+                                                        th:selected="${bs.chuyenKhoa != null && bs.chuyenKhoa.id == c.id}">
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Học Vị / Chức Danh <span class="text-danger">*</span></label>
+                                            <input type="text" name="hocVi" class="form-control" th:value="${bs.hocVi}" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Mô Tả Kinh Nghiệm / Thế Mạnh</label>
+                                            <textarea name="moTa" class="form-control" rows="3" th:text="${bs.moTa}"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy</button>
+                                        <button type="submit" class="btn btn-primary btn-sm fw-bold">Lưu Thay Đổi</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= TAB 5: QUẢN LÝ TÀI KHOẢN ================= -->
+            <div class="tab-pane fade" id="tab-taikhoan" role="tabpanel">
+                <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show shadow-sm border-0 mb-3" role="alert">
+                    <span>✅ </span><span th:text="${successMessage}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+
+                <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show shadow-sm border-0 mb-3" role="alert">
+                    <span>❌ </span><span th:text="${errorMessage}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold text-dark mb-0">👥 Quản Lý Tài Khoản Hệ Thống</h5>
+                    <button class="btn btn-dark fw-bold px-3" data-bs-toggle="modal" data-bs-target="#modalCapTaiKhoanBacSi">
+                        + Cấp Tài Khoản
+                    </button>
+                </div>
+
+                <div class="card border-0 bg-light p-1 mb-4 rounded-3">
+                    <ul class="nav nav-pills nav-justified" id="pills-tab-account" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active fw-bold text-dark" id="pills-benhnhan-tab" data-bs-toggle="pill" data-bs-target="#pills-benhnhan" type="button" role="tab">
+                                👤 Tài Khoản Bệnh Nhân
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link fw-bold text-dark" id="pills-bacsi-tab" data-bs-toggle="pill" data-bs-target="#pills-bacsi" type="button" role="tab">
+                                🩺 Tài Khoản Bác Sĩ
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="tab-content" id="pills-tabAccountContent">
+                    
+                    <!-- 5.1. TAB CON: BỆNH NHÂN -->
+                    <div class="tab-pane fade show active" id="pills-benhnhan" role="tabpanel">
+                        <div class="card border-0 shadow-sm rounded-3 mb-4">
+                            <div class="card-header bg-white py-3 border-0">
+                                <h6 class="fw-bold mb-0 text-secondary">👤 Danh Sách Bệnh Nhân</h6>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th class="ps-3">ID</th>
+                                            <th>Họ Và Tên</th>
+                                            <th>Email</th>
+                                            <th>Số Điện Thoại</th>
+                                            <th class="text-center">Hành Động</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="nd : ${dsNguoiDung}" th:if="${nd.vaiTro != null and nd.vaiTro.name() == 'BENH_NHAN'}">
+                                            <td class="ps-3" th:text="${nd.id}">1</td>
+                                            <td th:text="${nd.hoTen}" class="fw-bold">Nguyễn Văn Bệnh Nhân</td>
+                                            <td th:text="${nd.email}">patient@gmail.com</td>
+                                            <td th:text="${nd.soDienThoai != null ? nd.soDienThoai : 'Chưa cập nhật'}">0912345678</td>
+                                            <td class="text-center">
+                                                <a th:href="@{/admin/tai-khoan/doi-trang-thai/{id}(id=${nd.id})}" 
+                                                   class="btn btn-sm btn-light border me-1"
+                                                   th:classappend="${nd.trangThai != null and nd.trangThai.toString() == 'KHOA' ? 'text-success' : 'text-warning'}">
+                                                    <span th:text="${nd.trangThai != null and nd.trangThai.toString() == 'KHOA' ? '🔓 mở' : '🔒 khóa'}"></span>
+                                                </a>
+                                                <a th:href="@{/admin/tai-khoan/xoa/{id}(id=${nd.id})}" 
+                                                   class="btn btn-sm btn-light border text-danger"
+                                                   onclick="return confirm('Bạn có chắc chắn muốn xóa tài khoản này?');">
+                                                    🗑️
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 5.2. TAB CON: BÁC SĨ -->
+                    <div class="tab-pane fade" id="pills-bacsi" role="tabpanel">
+                        <div class="card border-0 shadow-sm rounded-3 mb-4">
+                            <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                <h6 class="fw-bold mb-0 text-secondary">👨‍⚕️ Danh Sách Bác Sĩ</h6>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="input-group input-group-sm" style="width: 220px;">
+                                        <input type="text" id="searchAccBacSi" class="form-control" placeholder="Search bác sĩ...">
+                                        <span class="input-group-text bg-white">🔍</span>
+                                    </div>
+                                    <select id="filterChuyenKhoaBacSi" class="form-select form-select-sm" style="width: 180px;">
+                                        <option value="">Filter 🏥 (Chuyên khoa)</option>
+                                        <option th:each="ck : ${dsChuyenKhoa}" 
+                                                th:value="${ck.tenChuyenKhoa}" 
+                                                th:text="${ck.tenChuyenKhoa}">Nội Khoa</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0" id="tableAccBacSi">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th class="ps-3">ID</th>
+                                            <th>Họ Và Tên</th>
+                                            <th>Chuyên Khoa</th>
+                                            <th>Email</th>
+                                            <th>Số Điện Thoại</th>
+                                            <th class="text-center" width="18%">Hành Động</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="bs : ${dsBacSi}" 
+                                            th:data-chuyenkhoa="${bs.chuyenKhoa != null ? bs.chuyenKhoa.tenChuyenKhoa : ''}">
+                                            <td class="ps-3" th:text="${bs.id}">1</td>
+                                            <td th:text="${bs.hoTen != null ? bs.hoTen : 'Chưa cập nhật'}" class="fw-bold text-primary">BS. Nguyễn Văn A</td>
+                                            <td>
+                                                <span th:text="${bs.chuyenKhoa != null ? bs.chuyenKhoa.tenChuyenKhoa : 'Chưa phân công'}" 
+                                                      class="badge bg-info-subtle text-info border border-info fw-semibold">Nội Khoa</span>
+                                            </td>
+                                            <td th:text="${bs.email != null ? bs.email : 'Chưa cập nhật'}">doctor@gmail.com</td>
+                                            <td th:text="${bs.soDienThoai != null ? bs.soDienThoai : 'Chưa cập nhật'}">0901234567</td>
+                                            <td class="text-center">
+                                                <a th:href="@{/admin/bac-si/doi-trang-thai/{id}(id=${bs.id})}" 
+                                                   class="btn btn-sm btn-light border me-1"
+                                                   th:classappend="${bs.trangThai != null and bs.trangThai.toString() == 'KHOA' ? 'text-success' : 'text-warning'}">
+                                                    <span th:text="${bs.trangThai != null and bs.trangThai.toString() == 'KHOA' ? '🔓 mở' : '🔒 khóa'}"></span>
+                                                </a>
+                                                <a th:href="@{/admin/bac-si/xoa/{id}(id=${bs.id})}" 
+                                                   class="btn btn-sm btn-light border text-danger"
+                                                   onclick="return confirm('Bạn có chắc chắn muốn xóa VĨNH VIỄN bác sĩ này?');">
+                                                    🗑️
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- ================= MODAL CẤP TÀI KHOẢN BÁC SĨ (ĐOẠN 2) ================= -->
+<div class="modal fade text-start" id="modalCapTaiKhoanBacSi" tabindex="-1" aria-labelledby="modalCapTaiKhoanLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            
+            <form th:action="@{/admin/bac-si/them}" method="post">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title fw-bold" id="modalCapTaiKhoanLabel">🩺 Cấp Tài Khoản Bác Sĩ Mới</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                
+                <div class="modal-body p-4">
+                    <p class="text-muted small mb-3">Hệ thống sẽ đồng thời tạo Tài khoản đăng nhập và Hồ sơ Bác sĩ chuyên khoa.</p>
+                    
+                    <!-- 1. Họ và tên bác sĩ -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Họ và Tên Bác sĩ <span class="text-danger">*</span></label>
+                        <input type="text" name="hoTen" class="form-control" placeholder="Ví dụ: BS. Nguyễn Văn A" required>
+                    </div>
+
+                    <!-- 2. Email đăng nhập -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Email Đăng Nhập <span class="text-danger">*</span></label>
+                        <input type="email" name="email" class="form-control" placeholder="doctor@gmail.com" required>
+                    </div>
+
+                    <!-- 3. Mật khẩu khởi tạo -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Mật Khẩu Khởi Tạo <span class="text-danger">*</span></label>
+                        <input type="password" name="matKhau" class="form-control" placeholder="Nhập mật khẩu..." required>
+                    </div>
+
+                    <!-- 4. Số điện thoại -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Số Điện Thoại</label>
+                        <input type="text" name="soDienThoai" class="form-control" placeholder="0901234567">
+                    </div>
+
+                    <!-- 5. Phân công Chuyên Khoa -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Chuyên Khoa Công Tác <span class="text-danger">*</span></label>
+                        <select name="chuyenKhoaId" class="form-select" required>
+                            <option value="" disabled selected>-- Chọn chuyên khoa --</option>
+                            <option th:each="ck : ${dsChuyenKhoa}" 
+                                    th:value="${ck.id}" 
+                                    th:text="${ck.tenChuyenKhoa}">Nội Khoa</option>
+                        </select>
+                    </div>
+
+                    <!-- 6. Học vị / Chức danh -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Học Vị / Chức Danh <span class="text-danger">*</span></label>
+                        <input type="text" name="hocVi" class="form-control" placeholder="Ví dụ: Thạc sĩ, Bác sĩ CKI..." required>
+                    </div>
+
+                    <!-- 7. Mô tả kinh nghiệm -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Mô Tả Kinh Nghiệm / Thế Mạnh</label>
+                        <textarea name="moTa" class="form-control" rows="3" placeholder="Mô tả ngắn gọn về chuyên môn..."></textarea>
+                    </div>
+                </div>
+                
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-dark btn-sm fw-bold">➕ Tạo Tài Khoản & Hồ Sơ</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<!-- JS Bootstrap 5 -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Script xử lý Lọc & Tìm kiếm độc lập 2 Tab -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    
+    // 1. Xử lý Lọc & Tìm kiếm cho BỆNH NHÂN
+    const searchBN = document.getElementById("searchAccBenhNhan");
+    const filterKhamBN = document.getElementById("filterStatusKhamBenhNhan");
+    const tableBN = document.getElementById("tableAccBenhNhan")?.querySelector("tbody");
+
+    function filterBN() {
+        if (!tableBN) return;
+        const kw = searchBN.value.toLowerCase().trim();
+        const khamSt = filterKhamBN.value.trim();
+
+        Array.from(tableBN.rows).forEach(row => {
+            const text = row.textContent.toLowerCase();
+            const khamAttr = row.getAttribute("data-kham") || "";
+
+            const matchKW = text.includes(kw);
+            const matchKham = khamSt === "" || khamAttr === khamSt;
+
+            row.style.display = (matchKW && matchKham) ? "" : "none";
+        });
+    }
+
+    searchBN?.addEventListener("keyup", filterBN);
+    filterKhamBN?.addEventListener("change", filterBN);
+
+    // 2. Xử lý Lọc & Tìm kiếm cho BÁC SĨ
+    const searchBS = document.getElementById("searchAccBacSi");
+    const filterCKBS = document.getElementById("filterChuyenKhoaBacSi");
+    const tableBS = document.getElementById("tableAccBacSi")?.querySelector("tbody");
+
+    function filterBS() {
+        if (!tableBS) return;
+        const kw = searchBS.value.toLowerCase().trim();
+        const ckSt = filterCKBS.value.toLowerCase().trim();
+
+        Array.from(tableBS.rows).forEach(row => {
+            const text = row.textContent.toLowerCase();
+            const chuyenKhoaAttr = (row.getAttribute("data-chuyenkhoa") || "").toLowerCase();
+
+            const matchKW = text.includes(kw);
+            const matchCK = ckSt === "" || chuyenKhoaAttr.includes(ckSt);
+
+            row.style.display = (matchKW && matchCK) ? "" : "none";
+        });
+    }
+
+    searchBS?.addEventListener("keyup", filterBS);
+    filterCKBS?.addEventListener("change", filterBS);
+});
+</script>
+
+<!-- SCRIPT BẮT BUỘC ĐỂ GIỮ TAB KHI SUBMIT FORM/RELOAD -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // 1. Kiểm tra Hashtag trên URL trước, nếu không có mới lấy trong localStorage
+    let activeHash = window.location.hash || localStorage.getItem("activeAdminTab");
+
+    if (activeHash && activeHash !== "#") {
+        // Tìm button/link ở Sidebar tương ứng với Hash (VD: #chuyen-khoa)
+        let tabTrigger = document.querySelector(`[data-bs-target="${activeHash}"], [href="${activeHash}"]`);
+        
+        if (tabTrigger) {
+            // Tắt active của tất cả các Tab hiện tại
+            document.querySelectorAll('.nav-link, .tab-pane').forEach(el => {
+                el.classList.remove('active', 'show');
+            });
+
+            // Mở tab được lưu
+            let tabInstance = new bootstrap.Tab(tabTrigger);
+            tabInstance.show();
+
+            // Hiển thị nội dung Tab
+            let targetContent = document.querySelector(activeHash);
+            if (targetContent) {
+                targetContent.classList.add('active', 'show');
+            }
+        }
+    }
+
+    // 2. Lưu trạng thái mỗi khi người dùng click chuyển tab thủ công
+    let tabElements = document.querySelectorAll('[data-bs-toggle="tab"], [data-bs-toggle="pill"]');
+    tabElements.forEach(function (tabEl) {
+        tabEl.addEventListener('click', function (e) {
+            let target = this.getAttribute('data-bs-target') || this.getAttribute('href');
+            if (target && target.startsWith('#')) {
+                localStorage.setItem("activeAdminTab", target);
+                history.replaceState(null, null, target);
+            }
+        });
+    });
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

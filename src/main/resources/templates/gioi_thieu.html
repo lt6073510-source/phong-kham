@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Giới thiệu - Phòng khám An Tâm</title>
+    <!-- Thêm thư viện FontAwesome để hiển thị icon ngôi nhà -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/cot.css}">
+    <style>
+        body { 
+            margin: 0; 
+            padding: 0; 
+            font-family: Arial, sans-serif; 
+            background-color: #f9f9f9; 
+        }
+        
+        /* Menu điều hướng nằm sát mép trên, chữ không gạch chân và đồng bộ màu */
+        .navbar-custom { 
+            background-color: #0077c2 !important; 
+            padding: 8px 20px; 
+        }
+        .navbar-brand, .navbar-brand:hover, .navbar-brand:focus { 
+            color: #ffffff !important; 
+            font-size: 18px; 
+            font-weight: bold; 
+            text-decoration: none !important; 
+        }
+        .navbar-brand span {
+            text-decoration: none !important;
+        }
+
+        /* Container chia 2 cột chung */
+        .gioi-thieu-container {
+            display: flex;
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+            gap: 40px;
+            align-items: center;
+        }
+
+        /* Khối nền trắng chứa toàn bộ nội dung lịch sử & định hướng */
+        .gioi-thieu-block-trang {
+            background-color: #ffffff; 
+            padding: 40px; 
+            border-radius: 15px; 
+            border: none !important;
+            max-width: 1200px;
+            margin: 40px auto;
+        }
+        
+        /* Hàng lịch sử: Ảnh cái cây bên trái, chữ Lịch sử hình thành bên phải */
+        .row-lich-su {
+            display: flex;
+            gap: 40px;
+            align-items: center;
+        }
+
+        /* Định dạng ảnh nhỏ (cho cây) */
+        .image-content-large { 
+            flex: 1.2; 
+            text-align: center; 
+        }
+        .image-content-large img { 
+            width: 100%; 
+            max-width: 550px; 
+            height: auto;
+            border-radius: 12px; 
+            border: none !important; 
+        }
+
+        /* Định dạng ảnh Full width (ảnh 4) */
+        .image-full-width {
+            text-align: center;
+            margin: 50px auto 30px auto;
+            max-width: 1200px;
+            padding: 0 20px;
+            border: none !important;
+        }
+        .image-full-width img {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 15px;
+            border: none !important;
+            outline: none !important;
+        }
+
+        /* Định dạng chữ màu xanh, to rõ */
+        .text-content-blue { 
+            flex: 1.3; 
+            color: #0077c2; 
+            font-size: 18px; 
+            line-height: 1.8; 
+        }
+        .text-content-blue h2 { 
+            color: #0077c2; 
+            margin-bottom: 15px; 
+            font-size: 26px; 
+        }
+        .text-content-blue p { 
+            margin-bottom: 18px; 
+            color: #005f93; 
+        }
+        
+        /* Style cho phần 1 đầu trang */
+        .text-content-blue-1 { 
+            flex: 1.3; 
+            color: #0077c2; 
+            font-size: 18px; 
+            line-height: 1.8; 
+        }
+        .text-content-blue-1 h1 { 
+            color: #0077c2; 
+            margin-bottom: 15px; 
+            font-size: 32px; 
+        }
+        .text-content-blue-1 p { 
+            margin-bottom: 18px; 
+            color: #005f93; 
+        }
+        .image-content-1 { 
+            flex: 1; 
+            text-align: center; 
+        }
+        .image-content-1 img { 
+            width: 100%; 
+            max-width: 550px; 
+            border-radius: 12px; 
+            border: none !important;
+        }
+
+        /* Phần liên hệ / Lịch làm việc nền xanh */
+        .footer-xanh {
+            background-color: #0077c2;
+            color: white;
+            padding: 50px 20px;
+            margin-top: 60px; 
+            text-align: center;
+            border: none !important;
+        }
+        .footer-xanh h3 { margin-bottom: 30px; font-size: 22px; }
+        .lich-lam-viec {
+            display: flex;
+            justify-content: space-around;
+            gap: 30px;
+            max-width: 1000px;
+            margin: auto;
+            text-align: left;
+        }
+        .lich-lam-viec > div {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 8px;
+            border: none !important;
+        }
+        .lich-lam-viec h4 { margin-top: 0; color: #FFD700; font-size: 18px; margin-bottom: 10px; }
+        .lich-lam-viec p { margin: 6px 0; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+    <!-- Thanh điều hướng thu gọn, dính sát mép trên, không gạch chân -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom shadow-sm">
+        <div class="container-fluid" style="padding-left: 10px;">
+            <a class="navbar-brand d-flex align-items-center" href="/">
+                <i class="fa-solid fa-house" style="color: #ffffff !important; font-size: 18px; margin-right: 8px;"></i>
+                <span>Trang Chủ</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Phần 1: Giới thiệu chung -->
+    <div class="gioi-thieu-container">
+        <div class="text-content-blue-1">
+            <h1>Phòng khám An Tâm</h1>
+            <p>Là địa chỉ tin cậy chăm sóc sức khỏe toàn diện cho cả gia đình. Với sứ mệnh mang đến dịch vụ y tế chất lượng cao, chúng tôi quy tụ đội ngũ bác sĩ chuyên khoa giàu kinh nghiệm, tận tâm cùng hệ thống trang thiết bị chẩn đoán hiện đại, đạt chuẩn quốc tế.</p>
+            <p>Tại phòng khám An Tâm, chúng tôi cung cấp đa dạng các dịch vụ từ khám tổng quát, tầm soát bệnh lý đến các chuyên khoa sâu như Nội, Ngoại, Nhi, Sản và chẩn đoán hình ảnh. Với không gian thăm khám sạch sẽ, tiện nghi và quy trình làm việc khoa học, An Tâm cam kết tối ưu hóa thời gian chờ đợi, mang lại trải nghiệm y tế nhẹ nhàng, an toàn và hiệu quả nhất cho mỗi khách hàng.</p>
+        </div>
+        <div class="image-content-1">
+            <img th:src="@{anh_gioi_thieu.jpg}" alt="Giới thiệu An Tâm">
+        </div>
+    </div>
+
+    <!-- Khối 1: Lịch sử hình thành -->
+    <div class="gioi-thieu-block-trang">
+        <div class="row-lich-su">
+            <div class="image-content-large">
+                <img th:src="@{anh_gioi_thieu_2.png}" alt="Lịch sử phát triển An Tâm">
+            </div>
+            <div class="text-content-blue">
+                <h2>Lịch sử hình thành và phát triển Phòng khám Đa khoa</h2>
+                <p>Trải qua chặng đường xây dựng và phát triển, Phòng khám Đa khoa An Tâm tự hào là địa chỉ y tế uy tín, chuyên nghiệp, luôn đặt sức khỏe và sự hài lòng của người bệnh lên hàng đầu. Từ những ngày đầu thành lập với quy mô nhỏ, phòng khám không ngừng nỗ lực hoàn thiện, mở rộng quy mô chuyên môn và cập nhật các trang thiết bị y tế hiện đại nhằm đáp ứng nhu cầu chăm sóc sức khỏe ngày càng cao của cộng đồng.</p>
+                <p>Sự phát triển vững mạnh của phòng khám được thể hiện rõ nét qua quá trình hình thành và không ngừng nâng cao chất lượng của 5 chuyên khoa.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ảnh 4 full to tràn màn hình -->
+    <div class="image-full-width">
+        <img th:src="@{anh_gioi_thieu_4.png}" alt="Không gian phòng khám An Tâm">
+    </div>
+
+    <!-- Phần Định hướng tương lai -->
+    <div class="gioi-thieu-block-trang">
+        <div class="text-content-blue" style="max-width: 100%;">
+            <h2>Định hướng tương lai</h2>
+            <p>Trải qua quá trình hình thành và phát triển, cả 5 chuyên khoa Nội, Ngoại, Mắt, Răng - Hàm - Mặt và Da liễu đã và đang phối hợp nhịp nhàng, tạo thành một hệ sinh thái y tế khép kín, tiện lợi. Trong thời gian tới, Phòng khám Đa khoa An Tâm tiếp tục cam kết nâng cao chất lượng dịch vụ, cải tiến quy trình đón tiếp, ứng dụng công nghệ số trong quản lý y tế để luôn xứng đáng là điểm tựa chăm sóc sức khỏe tin cậy của mọi nhà.</p>
+        </div>
+    </div>
+
+    <!-- Phần liên hệ / Lịch làm việc nền xanh -->
+    <div class="footer-xanh">
+        <h3>📍 Địa chỉ: 18 Giải Phóng, Phương Mai, Đống Đa, Hà Nội</h3>
+        <div class="lich-lam-viec">
+            <div>
+                <h4>Khoa khám bệnh theo yêu cầu</h4>
+                <p>+ Thứ 2 - Thứ 6: Tiếp đón 05:00 | Khám từ 06:00</p>
+                <p>+ Thứ 7 - CN: Tiếp đón 05:30 | Khám từ 06:00 - 16:30</p>
+            </div>
+            <div>
+                <h4>Khoa Khám bệnh (Thứ 2 - Thứ 6)</h4>
+                <p>Tiếp đón từ 07:00</p>
+                <p>Sáng: 07:30 - 12:00 | Chiều: 13:30 - 16:30</p>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

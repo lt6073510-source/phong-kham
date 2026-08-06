@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng Ký Tài Khoản Bệnh Nhân - Phòng Khám Tâm An</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(rgba(12, 74, 110, 0.75), rgba(14, 165, 233, 0.65)), url('anh_dang_ky.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 30px 0;
+        }
+        .register-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            max-width: 500px;
+            width: 100%;
+        }
+        .register-header {
+            background-color: #0c4a6e;
+            color: #ffffff;
+            padding: 30px;
+            text-align: center;
+        }
+        .medical-icon {
+            font-size: 2.5rem;
+            color: #38bdf8;
+            margin-bottom: 10px;
+        }
+        .btn-medical {
+            background-color: #0ea5e9;
+            color: white;
+            font-weight: 600;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+        .btn-medical:hover {
+            background-color: #0284c7;
+            color: white;
+        }
+        .form-control {
+            border-radius: 10px;
+            padding: 12px 15px;
+            border: 1px solid #cbd5e1;
+        }
+        .form-control:focus {
+            border-color: #0ea5e9;
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+        }
+        .input-group-text {
+            background-color: #f8fafc;
+            border-radius: 0 10px 10px 0 !important;
+            cursor: pointer;
+            color: #64748b;
+        }
+        .login-link {
+            color: #0ea5e9;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .login-link:hover {
+            text-decoration: underline;
+            color: #0284c7;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container d-flex justify-content-center">
+    <div class="register-card">
+        
+        <!-- Header -->
+        <div class="register-header">
+            <i class="fa-solid fa-user-injured medical-icon"></i>
+            <h3 class="fw-bold mb-1">ĐĂNG KÝ BỆNH NHÂN</h3>
+            <p class="text-white-50 small mb-0">Nhập thông tin tài khoản cá nhân của bạn</p>
+        </div>
+        
+        <!-- Form Body -->
+        <div class="card-body p-4 p-sm-5">
+            
+            <!-- Hiển thị thông báo lỗi từ FlashAttribute -->
+            <div th:if="${loi}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fa-solid fa-circle-exclamation me-2"></i>
+                <span th:text="${loi}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+            <!-- URL action chuyển sang /dang_ky -->
+            <form action="/dang_ky" method="POST" onsubmit="return validateForm()">
+                
+                <!-- Họ và tên -->
+                <div class="mb-3">
+                    <label class="form-label fw-medium text-secondary">Họ và tên <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" name="hoTen" id="fullName" placeholder="Nguyễn Văn A">
+                    <div class="invalid-feedback">Vui lòng nhập họ và tên của bạn.</div>
+                </div>
+
+                <!-- Địa chỉ Gmail -->
+                <div class="mb-3">
+                    <label class="form-label fw-medium text-secondary">Địa chỉ Gmail <span class="text-danger">*</span></label>
+                    <input type="email" class="form-control" name="email" id="email" placeholder="example@gmail.com">
+                    <div class="invalid-feedback">Vui lòng nhập định dạng email hợp lệ.</div>
+                </div>
+
+                <!-- Số điện thoại -->
+                <div class="mb-3">
+                    <label class="form-label fw-medium text-secondary">Số điện thoại <span class="text-danger">*</span></label>
+                    <input type="tel" class="form-control" name="soDienThoai" id="soDienThoai" placeholder="0987654321">
+                    <div class="invalid-feedback">Vui lòng nhập số điện thoại hợp lệ.</div>
+                </div>
+
+                <!-- Mật khẩu -->
+                <div class="mb-3">
+                    <label class="form-label fw-medium text-secondary">Mật khẩu <span class="text-danger">*</span></label>
+                    <div class="input-group">
+                        <input type="password" class="form-control" name="matKhau" id="password" placeholder="Tối thiểu 6 ký tự">
+                        <span class="input-group-text" onclick="togglePassword('password', 'toggleIcon1')">
+                            <i class="fa-solid fa-eye" id="toggleIcon1"></i>
+                        </span>
+                        <div class="invalid-feedback">Mật khẩu phải chứa ít nhất 6 ký tự.</div>
+                    </div>
+                </div>
+
+                <!-- Xác nhận mật khẩu -->
+                <div class="mb-4">
+                    <label class="form-label fw-medium text-secondary">Xác nhận mật khẩu <span class="text-danger">*</span></label>
+                    <div class="input-group">
+                        <input type="password" class="form-control" id="confirmPassword" placeholder="Nhập lại mật khẩu">
+                        <span class="input-group-text" onclick="togglePassword('confirmPassword', 'toggleIcon2')">
+                            <i class="fa-solid fa-eye" id="toggleIcon2"></i>
+                        </span>
+                        <div class="invalid-feedback">Mật khẩu nhập lại không khớp.</div>
+                    </div>
+                </div>
+
+                <!-- Nút Đăng ký -->
+                <button type="submit" class="btn btn-medical w-100 mb-3">
+                    <i class="fa-solid fa-user-plus me-2"></i>Đăng Ký Tài Khoản
+                </button>
+
+                <!-- Liên kết sang đăng nhập (/dang_nhap) -->
+                <div class="text-center mt-3">
+                    <span class="text-muted small">Bạn đã có tài khoản rồi?</span>
+                    <a href="/dang_nhap" class="login-link small ms-1">Đăng nhập tại đây</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function togglePassword(inputId, iconId) {
+        const passwordInput = document.getElementById(inputId);
+        const toggleIcon = document.getElementById(iconId);
+        if (passwordInput.type === "password") {
+            passwordInput.type = "text";
+            toggleIcon.classList.replace("fa-eye", "fa-eye-slash");
+        } else {
+            passwordInput.type = "password";
+            toggleIcon.classList.replace("fa-eye-slash", "fa-eye");
+        }
+    }
+
+    function validateForm() {
+        let isValid = true;
+        const fullName = document.getElementById("fullName");
+        const email = document.getElementById("email");
+        const soDienThoai = document.getElementById("soDienThoai");
+        const password = document.getElementById("password");
+        const confirmPassword = document.getElementById("confirmPassword");
+
+        [fullName, email, soDienThoai, password, confirmPassword].forEach(input => input.classList.remove("is-invalid"));
+
+        if (fullName.value.trim() === "") { fullName.classList.add("is-invalid"); isValid = false; }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) { email.classList.add("is-invalid"); isValid = false; }
+        if (soDienThoai.value.trim() === "") { soDienThoai.classList.add("is-invalid"); isValid = false; }
+        if (password.value.length < 6) { password.classList.add("is-invalid"); isValid = false; }
+        if (confirmPassword.value !== password.value || confirmPassword.value === "") { confirmPassword.classList.add("is-invalid"); isValid = false; }
+
+        return isValid;
+    }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

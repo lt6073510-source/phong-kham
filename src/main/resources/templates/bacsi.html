@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .navbar-custom {
+            background-color: #0077c2;
+        }
+        .header-section {
+            background: linear-gradient(rgba(0, 119, 194, 0.9), rgba(0, 119, 194, 0.8));
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+        }
+        .doctor-card {
+            border: none;
+            border-radius: 12px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.04);
+            background: #ffffff;
+            overflow: hidden;
+        }
+        .doctor-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0,119,194,0.12);
+        }
+        .doctor-img-container {
+            height: 100%;
+            min-height: 200px;
+        }
+        .doctor-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .department-title {
+            color: #0077c2;
+            border-bottom: 3px solid #0077c2;
+            padding-bottom: 8px;
+            margin-top: 40px;
+            margin-bottom: 25px;
+            font-weight: 700;
+        }
+        .btn-booking {
+            background-color: #0077c2;
+            color: white;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        .btn-booking:hover {
+            background-color: #0284c7;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Thanh điều hướng -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom shadow-sm">
+        <div class="container d-flex align-items-center">
+    <a class="navbar-brand fw-bold text-white text-decoration-none" href="/">
+        <i class="fa-solid fa-house me-2"></i>Trang Chủ
+    </a>
+</div>
+    </nav>
+
+    <!-- Tiêu đề đầu trang -->
+    <div class="header-section mb-4">
+        <div class="container">
+            <h1 class="fw-bold mb-2">Đội Ngũ Bác Sĩ Chuyên Khoa</h1>
+            <p class="lead text-white-50 mb-0">Hệ thống y tế chất lượng cao với các chuyên gia đầu ngành</p>
+        </div>
+    </div>
+
+    <div class="container mb-5">
+
+        <!-- ================= KHOA NỘI (5 Bác sĩ) ================= -->
+        <h3 class="department-title"><i class="fa-solid fa-stethoscope me-2"></i>Khoa Nội Tổng Quát & Chuyên Sâu</h3>
+        <div class="row g-4">
+            
+            <!-- BS 1 -->
+            <div class="col-lg-6">
+                <div class="card doctor-card h-100">
+                    <div class="row g-0 h-100">
+                        <div class="col-4 doctor-img-container">
+                            <img src="/bs1.jpg" onerror="this.src='https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&q=80&w=400'" class="doctor-img" alt="Bác sĩ">
+                        </div>
+                        <div class="col-8">
+                            <div class="card-body d-flex flex-column h-100 p-3">
+                                <span class="badge bg-primary bg-opacity-10 text-primary align-self-start mb-1">Khoa Nội</span>
+                                <h5 class="card-title fw-bold text-dark mb-1">TS.BS. Nguyễn Văn Minh</h5>
+                                <p class="text-muted small mb-2"><strong class="text-dark">Chức vụ:</strong> Trưởng khoa Nội</p>
+                                <div class="mt-auto">
+                                  <a th:href="@{/dat_lich_kham_benh(department='Khoa Nội Tổng Quát & Chuyên Sâu', doctor='ThS.BS.Nguyễn Văn Minh')}" 
+   class="btn btn-booking btn-sm w-100">
+    <i class="fa-solid fa-calendar-check me-1"></i>Đặt Lịch Khám
+</a>
+</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BS 2 -->
+            <div class="col-lg-6">
+                <div class="card doctor-card h-100">
+                    <div class="row g-0 h-100">
+                        <div class="col-4 doctor-img-container">
+                            <img src="bs4.jpg" onerror="this.src='https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=400'" class="doctor-img" alt="Bác sĩ">
+                        </div>
+                        <div class="col-8">
+                            <div class="card-body d-flex flex-column h-100 p-3">
+                                <span class="badge bg-primary bg-opacity-10 text-primary align-self-start mb-1">Khoa Nội</span>
+                                <h5 class="card-title fw-bold text-dark mb-1">ThS.BS. Lê Thị Lan</h5>
+                                <p class="text-muted small mb-2"><strong class="text-dark">Chức vụ:</strong> Phó khoa Nội</p>
+                                <div class="mt-auto">
+                                   <a th:href="@{/dat_lich_kham_benh(department='Khoa Nội Tổng Quát & Chuyên Sâu', doctor='ThS.BS.Lê Thị Lan')}" 
+   class="btn btn-booking btn-sm w-100">
+    <i class="fa-solid fa-calendar-check me-1"></i>Đặt Lịch Khám
+</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BS 3 -->
+            <div class="col-lg-6">
+                <div class="card doctor-card h-100">
+                    <div class="row g-0 h-100">
+                        <div class="col-4 doctor-img-container">
+                            <img src="bs3.jpg" onerror="this.src='https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=400'" class="doctor-img" alt="Bác sĩ">
+                        </div>
+                        <div class="col-8">
+                            <div class="card-body d-flex flex-column h-100 p-3">
+                                <span class="badge bg-primary bg-opacity-10 text-primary align-self-start mb-1">Khoa Nội</span>
+                                <h5 class="card-title fw-bold text-dark mb-1">BS.CKII. Trần Thanh Tùng</h5>
+                                <p class="text-muted small mb-2"><strong class="text-dark">Chuyên môn:</strong> Bác sĩ Tim mạch</p>
+                                <div class="mt-auto">
+                                    <a th:href="@{/dat_lich_kham_benh(department='Khoa Nội Tổng Quát & Chuyên Sâu', doctor='ThS.BS.Trần Thanh Tùng ')}" 
+   class="btn btn-booking btn-sm w-100">
+    <i class="fa-solid fa-calendar-check me-1"></i>Đặt Lịch Khám
+</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BS 4 -->
+            <div class="col-lg-6">
+                <div class="card doctor-card h-100">
+                    <div class="row g-0 h-100">
+                        <div class="col-4 doctor-img-container">
+                            <img src="bs5.jpg" onerror="this.src='https://images.unsplash.com/photo-1594824813587-234237f8976b?auto=format&fit=crop&q=80&w=400'" class="doctor-img" alt="Bác sĩ">
+                        </div>
+                        <div class="col-8">
+                            <div class="card-body d-flex flex-column h-100 p-3">
+                                <span class="badge bg-primary bg-opacity-10 text-primary align-self-start mb-1">Khoa Nội</span>
+                                <h5 class="card-title fw-bold text-dark mb-1">BS.CKI. Phạm Thị Mai</h5>
+                                <p class="text-muted small mb-2"><strong class="text-dark">Chuyên môn:</strong> Bác sĩ Tiêu hóa</p>
+                                <div class="mt-auto">
+                                    <a th:href="@{/dat_lich_kham_benh(department='Khoa Nội Tổng Quát & Chuyên Sâu', doctor=' BS.CKI. Phạm Thị Mai')}" 
+   class="btn btn-booking btn-sm w-100">
+    <i class="fa-solid fa-calendar-check me-1"></i>Đặt Lịch Khám
+</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BS 5 -->
+            <div class="col-lg-6">
+                <div class="card doctor-card h-100">
+                    <div class="row g-0 h-100">
+                        <div class="col-4 doctor-img-container">
+                            <img src="bs2.jpg" onerror="this.src='https://images.unsplash.com/photo-1582750433449-648ed127bb54?auto=format&fit=crop&q=80&w=400'" class="doctor-img" alt="Bác sĩ">
+                        </div>
+                        <div class="col-8">
+                            <div class="card-body d-flex flex-column h-100 p-3">
+                                <span class="badge bg-primary bg-opacity-10 text-primary align-self-start mb-1">Khoa Nội</span>
+                                <h5 class="card-title fw-bold text-dark mb-1">BS. Hoàng Văn Hải</h5>
+                                <p class="text-muted small mb-2"><strong class="text-dark">Chuyên môn:</strong> Bác sĩ Nội tổng hợp</p>
+                                <div class="mt-auto">
+                                     <a th:href="@{/dat_lich_kham_benh(department='Khoa Nội Tổng Quát & Chuyên Sâu', doctor=' BS. Hoàng Văn Hải')}" 
+   class="btn btn-booking btn-sm w-100">
+    <i class="fa-solid fa-calendar-check me-1"></i>Đặt Lịch Khám
+</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+
+        <!-- ================= KHOA NGOẠI (5 Bác sĩ) ================= -->
+        <h3 class="department-title"><i class="fa-solid fa-scalpel me-2"></i>Khoa Ngoại Tổng Hợp & Chuyên Sâu</h3>
+        <div class="row g-4">
+            
+            <!-- BS 6 -->
+            <div class="col-lg-6">
+                <div class="card doctor-card h-100">
+                    <div class="row g-0 h-100">
+                        <div class="col-4 doctor-img-container">
+                            <img src="bs6.jpg" onerror="this.src='https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&q=80&w=400'" class="doctor-img" alt="Bác sĩ">
+                        </div>
+                        <div class="col-8">
+                            <div class="card-body d-flex flex-column h-100 p-3">
+                                <span class="badge bg-success bg-opacity-10 text-success align-self-start mb-1">Khoa Ngoại</span>
+                                <h5 class="card-title fw-bold text-dark mb-1">BS.CKII. Trần Quốc Dũng</h5>
+                                <p class="text-muted small mb-2"><strong class="text-dark">Chức vụ:</strong> Trưởng khoa Ngoại</p>
+                                <div class="mt-auto">
+                                    <a th:href="@{/dat_lich_kham_benh(department='Khoa Ngoại', doctor=' BS.CKII. Trần Quốc Dũng')}" 
+   class="btn btn-booking btn-sm w-100">
+    <i class="fa-solid fa-calendar-check me-1"></i>Đặt Lịch Khám
+</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BS 7 -->
+            <div class="col-lg-6">
+                <div class="card doctor-card h-100">
+                    <div class="row g-0 h-100">
+                        <div class="col-4 doctor-img-container">
+                            <img src="bs7.jpg" onerror="this.src='https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=400'" class="doctor-img" alt="Bác sĩ">
+                        </div>
+                        <div class="col-8">
+                            <div class="card-body d-flex flex-column h-100 p-3">
+                                <span class="badge bg-success bg-opacity-10 text-success align-self-start mb-1">Khoa Ngoại</span>
+                                <h5 class="card-title fw-bold text-dark mb-1">ThS.BS. Phạm Anh Tú</h5>
+                                <p class="text-muted small mb-2"><strong class="text-dark">Chức vụ:</strong> Phó khoa Ngoại</p>
+                                <div class="mt-auto">
+                                    <a th:href="@{/dat_lich_kham_benh(department='Khoa Ngoại', doctor=' ThS.BS. Phạm Anh Tú')}" 
+   class="btn btn-booking btn-sm w-100">
+    <i class="fa-solid fa-calendar-check me-1"></i>Đặt Lịch Khám
+</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BS 8 -->
+            <div class="col-lg-6">
+                <div class="card doctor-card h-100">
+                    <div class="row g-0 h-100">
+                        <div class="col-4 doctor-img-container">
+                            <img src="bs8.jpg" onerror="this.src='https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=400'" class="doctor-img" alt="Bác sĩ">
+                        </div>
+                        <div class="col-8">
+                            <div class="card-body d-flex flex-column h-100 p-3">
+                                <span class="badge bg-success bg-opacity-10 text-success align-self-start mb-1">Khoa Ngoại</span>
+                                <h5 class="card-title fw-bold text-dark mb-1">BS.CKI. Ngô Văn Đức</h5>
+                                <p class="text-muted small mb-2"><strong class="text-dark">Chuyên môn:</strong> Phẫu thuật viên Cột sống</p>
+                                <div class="mt-auto">
+                                    <a th:href="@{/dat_lich_kham_benh(department='Khoa Ngoại', doctor=' BS.CKI. Ngô Văn Đức')}" 
+   class="btn btn-booking btn-sm w-100">
+    <i class="fa-solid fa-calendar-check me-1"></i>Đặt Lịch Khám
+</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BS 9 -->
+            <div class="col-lg-6">
+                <div class="card doctor-card h-100">
+                    <div class="row g-0 h-100">
+                        <div class="col-4 doctor-img-container">
+                            <img src="bs9.jpg" onerror="this.src='https://images.unsplash.com/photo-1594824813587-234237f8976b?auto=format&fit=crop&q=80&w=400'" class="doctor-img" alt="Bác sĩ">
+                        </div>
+                        <div class="col-8">
+                            <div class="card-body d-flex flex-column h-100 p-3">
+                                <span class="badge bg-success bg-opacity-10 text-success align-self-start mb-1">Khoa Ngoại</span>
+                                <h5 class="card-title fw-bold text-dark mb-1">BS.CKI. Lê Hoàng Nam</h5>
+                                <p class="text-muted small mb-2"><strong class="text-dark">Chuyên môn:</strong> Bác sĩ Ngoại Chấn thương</p>
+                                <div class="mt-auto">
+                                     <a th:href="@{/dat_lich_kham_benh(department='Khoa Ngoại', doctor=' BS.CKI. Lê Hoàng Nam')}" 
+   class="btn btn-booking btn-sm w-100">
+    <i class="fa-solid fa-calendar-check me-1"></i>Đặt Lịch Khám
+</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BS 10 -->
+            <div class="col-lg-6">
+                <div class="card doctor-card h-100">
+                    <div class="row g-0 h-100">
+                        <div class="col-4 doctor-img-container">
+                            <img src="bs10.jpg" onerror="this.src='https://images.unsplash.com/photo-1582750433449-648ed127bb54?auto=format&fit=crop&q=80&w=400'" class="doctor-img" alt="Bác sĩ">
+                        </div>
+                        <div class="col-8">
+                            <div class="card-body d-flex flex-column h-100 p-3">
+                                <span class="badge bg-success bg-opacity-10 text-success align-self-start mb-1">Khoa Ngoại</span>
+                                <h5 class="card-title fw-bold text-dark mb-1">BS. Vũ Đình Khoa</h5>
+                                <p class="text-muted small mb-2"><strong class="text-dark">Chuyên môn:</strong> Bác sĩ Ngoại tổng quát</p>
+                                <div class="mt-auto">
+                                   <a th:href="@{/dat_lich_kham_benh(department='Khoa Ngoại', doctor=' BS. Vũ Đình Khoa')}" 
+   class="btn btn-booking btn-sm w-100">
+    <i class="fa-solid fa-calendar-check me-1"></i>Đặt Lịch Khám
+</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+
+<!-- ================= KHOA MẮT (3 Bác sĩ) ================= -->
+        <h3 class="department-title"><i class="fa-solid fa-eye me-2"></i>Khoa Mắt</h3>
+        <div class="row g-4 mb-5">
+            
+            <!-- BS 11 - Khoa Mắt -->
+            <div class="col-lg-6">
+                <div class="card doctor-card h-100">
+                    <div class="row g-0 h-100">
+                        <div class="col-4 doctor-img-container">
+                            <img src="bs13.jpg" onerror="this.src='https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=400'" class="doctor-img" alt="Bác sĩ">
+                        </div>
+                        <div class="col-8">
+                            <div class="card-body d-flex flex-column h-100 p-3">
+                                <span class="badge bg-warning bg-opacity-10 text-dark align-self-start mb-1">Khoa Mắt</span>
+                                <h5 class="card-title fw-bold text-dark mb-1">BS.CKI. Hoàng Mai Hoa</h5>
+                                <p class="text-muted small mb-2"><strong class="text-dark">Chức vụ:</strong> Trưởng khoa Mắt</p>
+                                <div class="mt-auto">
+                                    <a th:href="@{/dat_lich_kham_benh(department='Khoa Mắt', doctor='BS.CKI. Hoàng Mai Hoa')}" 
+   class="btn btn-booking btn-sm w-100">
+    <i class="fa-solid fa-calendar-check me-1"></i>Đặt Lịch Khám
+</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BS 12 - Khoa Mắt -->
+            <div class="col-lg-6">
+                <div class="card doctor-card h-100">
+                    <div class="row g-0 h-100">
+                        <div class="col-4 doctor-img-container">
+                            <img src="bs12.jpg" onerror="this.src='https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&q=80&w=400'" class="doctor-img" alt="Bác sĩ">
+                        </div>
+                        <div class="col-8">
+                            <div class="card-body d-flex flex-column h-100 p-3">
+                                <span class="badge bg-warning bg-opacity-10 text-dark align-self-start mb-1">Khoa Mắt</span>
+                                <h5 class="card-title fw-bold text-dark mb-1">ThS.BS. Đỗ Minh Khang</h5>
+                                <p class="text-muted small mb-2"><strong class="text-dark">Chuyên môn:</strong> Phẫu thuật viên Khúc xạ</p>
+                                <div class="mt-auto">
+                                    <a th:href="@{/dat_lich_kham_benh(department='Khoa Mắt', doctor='ThS.BS. Đỗ Minh Khang')}" 
+   class="btn btn-booking btn-sm w-100">
+    <i class="fa-solid fa-calendar-check me-1"></i>Đặt Lịch Khám
+</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BS 13 - Khoa Mắt -->
+            <div class="col-lg-6">
+                <div class="card doctor-card h-100">
+                    <div class="row g-0 h-100">
+                        <div class="col-4 doctor-img-container">
+                            <img src="bs11.jpg" onerror="this.src='https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=400'" class="doctor-img" alt="Bác sĩ">
+                        </div>
+                        <div class="col-8">
+                            <div class="card-body d-flex flex-column h-100 p-3">
+                                <span class="badge bg-warning bg-opacity-10 text-dark align-self-start mb-1">Khoa Mắt</span>
+                                <h5 class="card-title fw-bold text-dark mb-1">BS. Nguyễn Phương Thảo</h5>
+                                <p class="text-muted small mb-2"><strong class="text-dark">Chuyên môn:</strong> Bác sĩ Khám & Điều trị</p>
+                                <div class="mt-auto">
+                                  <a th:href="@{/dat_lich_kham_benh(department='Khoa Mắt', doctor='BS. Nguyễn Phương Thảo')}" 
+   class="btn btn-booking btn-sm w-100">
+    <i class="fa-solid fa-calendar-check me-1"></i>Đặt Lịch Khám
+</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+
+        <!-- ================= KHOA RĂNG HÀM MẶT (3 Bác sĩ) ================= -->
+        <h3 class="department-title"><i class="fa-solid fa-tooth me-2"></i>Khoa Răng - Hàm - Mặt</h3>
+        <div class="row g-4 mb-5">
+            
+            <!-- BS 14 - Khoa Răng Hàm Mặt -->
+            <div class="col-lg-6">
+                <div class="card doctor-card h-100">
+                    <div class="row g-0 h-100">
+                        <div class="col-4 doctor-img-container">
+                            <img src="bs14.jpg" onerror="this.src='https://images.unsplash.com/photo-1594824813587-234237f8976b?auto=format&fit=crop&q=80&w=400'" class="doctor-img" alt="Bác sĩ">
+                        </div>
+                        <div class="col-8">
+                            <div class="card-body d-flex flex-column h-100 p-3">
+                                <span class="badge bg-info bg-opacity-10 text-dark align-self-start mb-1">Khoa Răng - Hàm - Mặt</span>
+                                <h5 class="card-title fw-bold text-dark mb-1">ThS.BS. Vũ Hoàng Nam</h5>
+                                <p class="text-muted small mb-2"><strong class="text-dark">Chức vụ:</strong> Trưởng khoa Răng - Hàm - Mặt</p>
+                                <div class="mt-auto">
+                                   <a th:href="@{/dat_lich_kham_benh(department='Khoa Răng Hàm Mặt ', doctor='ThS.BS. Vũ Hoàng Nam')}" 
+   class="btn btn-booking btn-sm w-100">
+    <i class="fa-solid fa-calendar-check me-1"></i>Đặt Lịch Khám
+</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BS 15 - Khoa Răng Hàm Mặt -->
+            <div class="col-lg-6">
+                <div class="card doctor-card h-100">
+                    <div class="row g-0 h-100">
+                        <div class="col-4 doctor-img-container">
+                            <img src="bs15.jpg" onerror="this.src='https://images.unsplash.com/photo-1582750433449-648ed127bb54?auto=format&fit=crop&q=80&w=400'" class="doctor-img" alt="Bác sĩ">
+                        </div>
+                        <div class="col-8">
+                            <div class="card-body d-flex flex-column h-100 p-3">
+                                <span class="badge bg-info bg-opacity-10 text-dark align-self-start mb-1">Khoa Răng - Hàm - Mặt</span>
+                                <h5 class="card-title fw-bold text-dark mb-1">BS.CKI. Trịnh Bảo Ngọc</h5>
+                                <p class="text-muted small mb-2"><strong class="text-dark">Chuyên môn:</strong> Bác sĩ Chỉnh nha</p>
+                                <div class="mt-auto">
+                                   <a th:href="@{/dat_lich_kham_benh(department='Khoa Răng Hàm Mặt ', doctor='BS.CKI. Trịnh Bảo Ngọc')}" 
+   class="btn btn-booking btn-sm w-100">
+    <i class="fa-solid fa-calendar-check me-1"></i>Đặt Lịch Khám
+</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BS 16 - Khoa Răng Hàm Mặt -->
+            <div class="col-lg-6">
+                <div class="card doctor-card h-100">
+                    <div class="row g-0 h-100">
+                        <div class="col-4 doctor-img-container">
+                            <img src="bs16.jpg" onerror="this.src='https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=400'" class="doctor-img" alt="Bác sĩ">
+                        </div>
+                        <div class="col-8">
+                            <div class="card-body d-flex flex-column h-100 p-3">
+                                <span class="badge bg-info bg-opacity-10 text-dark align-self-start mb-1">Khoa Răng - Hàm - Mặt</span>
+                                <h5 class="card-title fw-bold text-dark mb-1">BS. Bùi Anh Tuấn</h5>
+                                <p class="text-muted small mb-2"><strong class="text-dark">Chuyên môn:</strong> Bác sĩ Phẫu thuật Hàm mặt</p>
+                                <div class="mt-auto">
+                                     <a th:href="@{/dat_lich_kham_benh(department='Khoa Răng Hàm Mặt ', doctor='BS. Bùi Anh Tuấn')}" 
+   class="btn btn-booking btn-sm w-100">
+    <i class="fa-solid fa-calendar-check me-1"></i>Đặt Lịch Khám
+</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+
+        <!-- ================= KHOA TAI MŨI HỌNG (3 Bác sĩ) ================= -->
+        <!-- BS 17 - Khoa Tai Mũi Họng -->
+        <div class="col-lg-6">
+            <div class="card doctor-card h-100">
+                <div class="row g-0 h-100">
+                    <div class="col-4 doctor-img-container">
+                        <img src="bs17.jpg" onerror="this.src='https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&q=80&w=400'" class="doctor-img" alt="Bác sĩ">
+                    </div>
+                    <div class="col-8">
+                        <div class="card-body d-flex flex-column h-100 p-3">
+                            <span class="badge bg-danger bg-opacity-10 text-danger align-self-start mb-1">Khoa Tai - Mũi - Họng</span>
+                            <h5 class="card-title fw-bold text-dark mb-1">BS.CKII. Lý Văn Thái</h5>
+                            <p class="text-muted small mb-2"><strong class="text-dark">Chức vụ:</strong> Trưởng khoa Tai - Mũi - Họng</p>
+                            <div class="mt-auto">
+                                <a th:href="@{/dat_lich_kham_benh(department='Khoa Tai Mũi Họng', doctor='BS.CKII. Lý Văn Thái')}" 
+                                   class="btn btn-booking btn-sm w-100">
+                                    <i class="fa-solid fa-calendar-check me-1"></i>Đặt Lịch Khám
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BS 18 - Khoa Tai Mũi Họng -->
+        <div class="col-lg-6">
+            <div class="card doctor-card h-100">
+                <div class="row g-0 h-100">
+                    <div class="col-4 doctor-img-container">
+                        <img src="bs18.jpg" onerror="this.src='https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=400'" class="doctor-img" alt="Bác sĩ">
+                    </div>
+                    <div class="col-8">
+                        <div class="card-body d-flex flex-column h-100 p-3">
+                            <span class="badge bg-danger bg-opacity-10 text-danger align-self-start mb-1">Khoa Tai - Mũi - Họng</span>
+                            <h5 class="card-title fw-bold text-dark mb-1">ThS.BS. Nguyễn Kim Anh</h5>
+                            <p class="text-muted small mb-2"><strong class="text-dark">Chuyên môn:</strong> Bác sĩ Điều trị</p>
+                            <div class="mt-auto">
+                                <a th:href="@{/dat_lich_kham_benh(department='Khoa Tai Mũi Họng', doctor='ThS.BS. Nguyễn Kim Anh')}" 
+                                   class="btn btn-booking btn-sm w-100">
+                                    <i class="fa-solid fa-calendar-check me-1"></i>Đặt Lịch Khám
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BS 19 - Khoa Tai Mũi Họng -->
+        <div class="col-lg-6">
+            <div class="card doctor-card h-100">
+                <div class="row g-0 h-100">
+                    <div class="col-4 doctor-img-container">
+                        <img src="bs19.jpg" onerror="this.src='https://images.unsplash.com/photo-1594824813587-234237f8976b?auto=format&fit=crop&q=80&w=400'" class="doctor-img" alt="Bác sĩ">
+                    </div>
+                    <div class="col-8">
+                        <div class="card-body d-flex flex-column h-100 p-3">
+                            <span class="badge bg-danger bg-opacity-10 text-danger align-self-start mb-1">Khoa Tai - Mũi - Họng</span>
+                            <h5 class="card-title fw-bold text-dark mb-1">BS. Đặng Quốc Huy</h5>
+                            <p class="text-muted small mb-2"><strong class="text-dark">Chuyên môn:</strong> Bác sĩ Nội soi</p>
+                            <div class="mt-auto">
+                                <a th:href="@{/dat_lich_kham_benh(department='Khoa Tai Mũi Họng', doctor='BS. Đặng Quốc Huy')}" 
+                                   class="btn btn-booking btn-sm w-100">
+                                    <i class="fa-solid fa-calendar-check me-1"></i>Đặt Lịch Khám
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
