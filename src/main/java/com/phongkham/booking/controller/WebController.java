@@ -26,6 +26,13 @@ import java.util.Optional;
 @Controller
 public class WebController {
 
+    // Khai báo cứng tài khoản & mật khẩu Admin 1 và Admin 2 trực tiếp
+    private final String ADMIN1_USERNAME = "admin1";
+    private final String ADMIN1_PASSWORD = "AdminPass123!";
+
+    private final String ADMIN2_USERNAME = "admin2";
+    private final String ADMIN2_PASSWORD = "AdminPass456!";
+
     @Autowired
     private KhoNguoiDungBenhNhan khoNguoiDungBenhNhan;
 
@@ -70,6 +77,21 @@ public class WebController {
                                HttpSession session,
                                RedirectAttributes redirectAttributes) {
         
+        // KIỂM TRA ĐĂNG NHẬP ADMIN CỨNG (Dùng tham số 'email' làm username nhập vào)
+        if (ADMIN1_USERNAME.equals(email) && ADMIN1_PASSWORD.equals(matKhau)) {
+            session.setAttribute("userName", "Admin 1");
+            session.setAttribute("userEmail", email);
+            session.setAttribute("userRole", "ADMIN");
+            return "redirect:/admin/dashboard";
+        }
+
+        if (ADMIN2_USERNAME.equals(email) && ADMIN2_PASSWORD.equals(matKhau)) {
+            session.setAttribute("userName", "Admin 2");
+            session.setAttribute("userEmail", email);
+            session.setAttribute("userRole", "ADMIN");
+            return "redirect:/admin/dashboard";
+        }
+
         Optional<NguoiDungBenhNhan> userOpt = khoNguoiDungBenhNhan.findByEmail(email);
 
         if (userOpt.isPresent() && userOpt.get().getMatKhau().equals(matKhau)) {
@@ -202,8 +224,7 @@ public class WebController {
                 newLich.setBacSiId(doctorId);
             }
 
-            // Gán bệnh nhân nếu đang đăng nhập (JPA sẽ tự động tự ánh xánh ID thông qua NguoiDungBenhNhan)
-           // Gán bệnh nhân nếu đang đăng nhập
+            // Gán bệnh nhân nếu đang đăng nhập
             Object userIdObj = session.getAttribute("userId");
             if (userIdObj != null) {
                 Long userId = Long.valueOf(userIdObj.toString());
