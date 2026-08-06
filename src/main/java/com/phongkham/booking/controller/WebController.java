@@ -26,246 +26,227 @@ import java.util.Optional;
 @Controller
 public class WebController {
 
-    // Khai báo cứng tài khoản & mật khẩu Admin 1 và Admin 2 trực tiếp
-    private final String ADMIN1_USERNAME = "admin1";
-    private final String ADMIN1_PASSWORD = "AdminPass123!";
+ @Autowired
+ private KhoNguoiDungBenhNhan khoNguoiDungBenhNhan;
 
-    private final String ADMIN2_USERNAME = "admin2";
-    private final String ADMIN2_PASSWORD = "AdminPass456!";
+ @Autowired
+ private BacSiRepository khoBacSi;
 
-    @Autowired
-    private KhoNguoiDungBenhNhan khoNguoiDungBenhNhan;
+@Autowired
+ private LichKhamService lichKhamService;
 
-    @Autowired
-    private BacSiRepository khoBacSi;
+ @Autowired
+ private ChuyenKhoaService chuyenKhoaService;
 
-    @Autowired
-    private LichKhamService lichKhamService;
+ @Autowired
+ private BacSiService bacSiService;
 
-    @Autowired
-    private ChuyenKhoaService chuyenKhoaService;
+ // =========================================================
+ // 1. CÁC TRANG GIAO DIỆN CHUNG & TĨNH
+ // =========================================================
+ @GetMapping("/")
+ public String index(Model model) {
+ List<ChuyenKhoa> dsChuyenKhoa = chuyenKhoaService.getAllChuyenKhoa();
+ model.addAttribute("danhSachChuyenKhoa", dsChuyenKhoa);
+ return "index";
+ }
 
-    @Autowired
-    private BacSiService bacSiService;
+ @GetMapping({"/gioi_thieu", "/gioi-thieu"})
+ public String trangGioiThieu() {
+ return "gioi_thieu";
+ }
 
-    // =========================================================
-    // 1. CÁC TRANG GIAO DIỆN CHUNG & TĨNH
-    // =========================================================
-    @GetMapping("/")
-    public String index(Model model) {
-        List<ChuyenKhoa> dsChuyenKhoa = chuyenKhoaService.getAllChuyenKhoa();
-        model.addAttribute("danhSachChuyenKhoa", dsChuyenKhoa);
-        return "index";
-    }
+ // =========================================================
+ // 2. ĐĂNG KÝ & ĐĂNG NHẬP BỆNH NHÂN / BÁC SĨ / ADMIN
+ // =========================================================
+ @GetMapping({"/dang-nhap", "/dang_nhap"})
+ public String trangDangNhap() {
+ return "dang_nhap";
+ }
 
-    @GetMapping({"/gioi_thieu", "/gioi-thieu"})
-    public String trangGioiThieu() {
-        return "gioi_thieu";
-    }
+ @PostMapping({"/dang-nhap", "/dang_nhap"})
+public String xuLyDangNhap(@RequestParam String email,
+@RequestParam String matKhau,
+HttpSession session,
+RedirectAttributes redirectAttributes) {
 
-    // =========================================================
-    // 2. ĐĂNG KÝ & ĐĂNG NHẬP BỆNH NHÂN / BÁC SĨ / ADMIN
-    // =========================================================
-    @GetMapping({"/dang-nhap", "/dang_nhap"})
-    public String trangDangNhap() {
-        return "dang_nhap";
-    }
+    Optional<NguoiDungBenhNhan> userOpt = khoNguoiDungBenhNhan.findByEmail(email);
 
-    @PostMapping({"/dang-nhap", "/dang_nhap"})
-    public String xuLyDangNhap(@RequestParam String email,
-                               @RequestParam String matKhau,
-                               HttpSession session,
-                               RedirectAttributes redirectAttributes) {
-        
-        // KIỂM TRA ĐĂNG NHẬP ADMIN CỨNG (Dùng tham số 'email' làm username nhập vào)
-        if (ADMIN1_USERNAME.equals(email) && ADMIN1_PASSWORD.equals(matKhau)) {
-            session.setAttribute("userName", "Admin 1");
-            session.setAttribute("userEmail", email);
-            session.setAttribute("userRole", "ADMIN");
-            return "redirect:/admin/dashboard";
-        }
+ if (userOpt.isPresent() && userOpt.get().getMatKhau().equals(matKhau)) {
+ NguoiDungBenhNhan user = userOpt.get();
+ session.setAttribute("userLuuSinh", user);
+session.setAttribute("userId", user.getId());
+ session.setAttribute("userEmail", user.getEmail());
+ session.setAttribute("userName", user.getHoTen());
+ session.setAttribute("userRole", "BENH_NHAN");
+ return "redirect:/";
+ }
 
-        if (ADMIN2_USERNAME.equals(email) && ADMIN2_PASSWORD.equals(matKhau)) {
-            session.setAttribute("userName", "Admin 2");
-            session.setAttribute("userEmail", email);
-            session.setAttribute("userRole", "ADMIN");
-            return "redirect:/admin/dashboard";
-        }
+ Optional<BacSi> bacSiOpt = khoBacSi.findByEmail(email);
 
-        Optional<NguoiDungBenhNhan> userOpt = khoNguoiDungBenhNhan.findByEmail(email);
+ if (bacSiOpt.isPresent() && bacSiOpt.get().getMatKhau().equals(matKhau)) {
+ BacSi bs = bacSiOpt.get();
+ session.setAttribute("userLuuSinh", bs);
+ session.setAttribute("doctorId", bs.getId()); 
+ session.setAttribute("bacSiId", bs.getId()); 
+ session.setAttribute("userEmail", bs.getEmail());
+ session.setAttribute("userName", bs.getHoTen());
 
-        if (userOpt.isPresent() && userOpt.get().getMatKhau().equals(matKhau)) {
-            NguoiDungBenhNhan user = userOpt.get();
-            session.setAttribute("userLuuSinh", user);
-            session.setAttribute("userId", user.getId());
-            session.setAttribute("userEmail", user.getEmail());
-            session.setAttribute("userName", user.getHoTen());
-            session.setAttribute("userRole", "BENH_NHAN");
-            return "redirect:/";
-        }
+ String vaiTro = bs.getVaiTro() != null ? bs.getVaiTro().toUpperCase() : "BAC_SI";
+ session.setAttribute("userRole", vaiTro);
 
-        Optional<BacSi> bacSiOpt = khoBacSi.findByEmail(email);
+ if ("ADMIN".equals(vaiTro)) {
+ return "redirect:/admin/dashboard";
+ } else {
+ return "redirect:/bac-si/dashboard";
+ }
+ }
 
-        if (bacSiOpt.isPresent() && bacSiOpt.get().getMatKhau().equals(matKhau)) {
-            BacSi bs = bacSiOpt.get();
-            session.setAttribute("userLuuSinh", bs);
-            session.setAttribute("doctorId", bs.getId()); 
-            session.setAttribute("bacSiId", bs.getId()); 
-            session.setAttribute("userEmail", bs.getEmail());
-            session.setAttribute("userName", bs.getHoTen());
+ redirectAttributes.addFlashAttribute("loi", "Email hoặc mật khẩu không chính xác!");
+ return "redirect:/dang-nhap";
+ }
 
-            String vaiTro = bs.getVaiTro() != null ? bs.getVaiTro().toUpperCase() : "BAC_SI";
-            session.setAttribute("userRole", vaiTro);
+@GetMapping({"/dang-ky", "/dang_ky"})
+ public String trangDangKy() {
+ return "dang_ky";
+ }
 
-            if ("ADMIN".equals(vaiTro)) {
-                return "redirect:/admin/dashboard";
-            } else {
-                return "redirect:/bac-si/dashboard";
-            }
-        }
+ @PostMapping({"/dang-ky", "/dang_ky"})
+ public String xuLyDangKy(
+ @RequestParam String hoTen,
+@RequestParam String email,
+@RequestParam String soDienThoai,
+@RequestParam String matKhau,
+RedirectAttributes redirectAttributes) {
 
-        redirectAttributes.addFlashAttribute("loi", "Email hoặc mật khẩu không chính xác!");
-        return "redirect:/dang-nhap";
-    }
+ if (khoNguoiDungBenhNhan.existsByEmail(email)) {
+redirectAttributes.addFlashAttribute("loi", "Email này đã được sử dụng!");
+return "redirect:/dang-ky";
+ }
 
-    @GetMapping({"/dang-ky", "/dang_ky"})
-    public String trangDangKy() {
-        return "dang_ky";
-    }
+ NguoiDungBenhNhan user = new NguoiDungBenhNhan();
+ user.setHoTen(hoTen);
+ user.setEmail(email);
+ user.setSoDienThoai(soDienThoai);
+ user.setMatKhau(matKhau);
+ user.setNgayTao(LocalDateTime.now());
 
-    @PostMapping({"/dang-ky", "/dang_ky"})
-    public String xuLyDangKy(@RequestParam String hoTen,
-                             @RequestParam String email,
-                             @RequestParam String soDienThoai,
-                             @RequestParam String matKhau,
-                             RedirectAttributes redirectAttributes) {
-        if (khoNguoiDungBenhNhan.existsByEmail(email)) {
-            redirectAttributes.addFlashAttribute("loi", "Email này đã được sử dụng!");
-            return "redirect:/dang-ky";
-        }
+ khoNguoiDungBenhNhan.save(user);
 
-        NguoiDungBenhNhan user = new NguoiDungBenhNhan();
-        user.setHoTen(hoTen);
-        user.setEmail(email);
-        user.setSoDienThoai(soDienThoai);
-        user.setMatKhau(matKhau);
-        user.setNgayTao(LocalDateTime.now());
+ redirectAttributes.addFlashAttribute("thongBao", "Đăng ký thành công! Vui lòng đăng nhập.");
+ return "redirect:/dang-nhap";
+ }
 
-        khoNguoiDungBenhNhan.save(user);
+ @GetMapping({"/dang-xuat", "/dang_xuat"})
+ public String dangXuat(HttpSession session) {
+ session.invalidate();
+ return "redirect:/";
+ }
 
-        redirectAttributes.addFlashAttribute("thongBao", "Đăng ký thành công! Vui lòng đăng nhập.");
-        return "redirect:/dang-nhap";
-    }
+ @GetMapping({"/doi_ngu_bac_si", "/doi-ngu-bac-si"})
+public String doiNguBacSi(Model model) {
+ List<ChuyenKhoa> dsChuyenKhoa = chuyenKhoaService.getAllChuyenKhoa(); 
+ model.addAttribute("danhSachChuyenKhoa", dsChuyenKhoa);
+return "doi_ngu_bac_si";
+ }
 
-    @GetMapping({"/dang-xuat", "/dang_xuat"})
-    public String dangXuat(HttpSession session) {
-        session.invalidate();
-        return "redirect:/";
-    }
+// =========================================================
+// 3. ĐẶT LỊCH KHÁM & LƯU VÀO CSDL
+// =========================================================
+ @GetMapping({"/dat_lich_kham_benh", "/dat-lich-kham-benh", "/dat-lich-kham"})
+ public String datLichKhamBenh(@RequestParam(name = "doctor", required = false) String doctorName, Model model) {
+ model.addAttribute("selectedDoctor", doctorName);
+ model.addAttribute("danhSachBacSi", bacSiService.getAllBacSi());
 
-    @GetMapping({"/doi_ngu_bac_si", "/doi-ngu-bac-si"})
-    public String doiNguBacSi(Model model) {
-        List<ChuyenKhoa> dsChuyenKhoa = chuyenKhoaService.getAllChuyenKhoa(); 
-        model.addAttribute("danhSachChuyenKhoa", dsChuyenKhoa);
-        return "doi_ngu_bac_si";
-    }
+ List<ChuyenKhoa> dsKhoa = chuyenKhoaService.getAllChuyenKhoa();
+ model.addAttribute("dsChuyenKhoa", dsKhoa);
+model.addAttribute("danhSachChuyenKhoa", dsKhoa);
 
-    // =========================================================
-    // 3. ĐẶT LỊCH KHÁM & LƯU VÀO CSDL
-    // =========================================================
-    @GetMapping({"/dat_lich_kham_benh", "/dat-lich-kham-benh", "/dat-lich-kham"})
-    public String datLichKhamBenh(@RequestParam(name = "doctor", required = false) String doctorName, Model model) {
-        model.addAttribute("selectedDoctor", doctorName);
-        model.addAttribute("danhSachBacSi", bacSiService.getAllBacSi());
-        
-        List<ChuyenKhoa> dsKhoa = chuyenKhoaService.getAllChuyenKhoa();
-        model.addAttribute("dsChuyenKhoa", dsKhoa);
-        model.addAttribute("danhSachChuyenKhoa", dsKhoa);
+ return "dat_lich_kham_benh"; 
+ }
 
-        return "dat_lich_kham_benh"; 
-    }
+ @PostMapping({"/dat-lich/luu", "/dat-lich-kham"})
+public String luuLichKham(
+@RequestParam(name = "fullName", required = false) String fullName,
+@RequestParam(name = "phone", required = false) String phone,
+ @RequestParam(name = "email", required = false) String email,
+@RequestParam(name = "department", required = false) String department,
+ @RequestParam(name = "doctorName", required = false) String doctorName,
+@RequestParam(name = "doctorId", required = false) Long doctorId,
+@RequestParam(name = "appointmentDate", required = false) String appointmentDate,
+ @RequestParam(name = "timeSlot", required = false) String timeSlot,
+@RequestParam(name = "note", required = false) String note,
+HttpSession session,
+RedirectAttributes redirectAttributes,
+ Model model) {
 
-    @PostMapping({"/dat-lich/luu", "/dat-lich-kham"})
-    public String luuLichKham(
-            @RequestParam(name = "fullName", required = false) String fullName,
-            @RequestParam(name = "phone", required = false) String phone,
-            @RequestParam(name = "email", required = false) String email,
-            @RequestParam(name = "department", required = false) String department,
-            @RequestParam(name = "doctorName", required = false) String doctorName,
-            @RequestParam(name = "doctorId", required = false) Long doctorId,
-            @RequestParam(name = "appointmentDate", required = false) String appointmentDate,
-            @RequestParam(name = "timeSlot", required = false) String timeSlot,
-            @RequestParam(name = "note", required = false) String note,
-            HttpSession session,
-            RedirectAttributes redirectAttributes,
-            Model model) {
+try {
+LichKham newLich = new LichKham();
 
-        try {
-            LichKham newLich = new LichKham();
-            
-            // Khớp với thuộc tính hoTenBenhNhan và tenBenhNhan trong LichKham.java
-            newLich.setHoTenBenhNhan(fullName);
-            newLich.setTenBenhNhan(fullName);
-            newLich.setSoDienThoai(phone);
-            
-            String userEmail = (email != null && !email.isBlank()) ? email : (String) session.getAttribute("userEmail");
-            newLich.setEmail(userEmail);
-            
-            newLich.setTenBacSi(doctorName);
-            newLich.setNgayKham(appointmentDate);
-            newLich.setGioKham(timeSlot);
-            newLich.setGhiChu(note);
-            newLich.setTrangThai("CHO_XAC_NHAN");
-            newLich.setNgayDat(LocalDateTime.now());
-            newLich.setNgayTao(LocalDateTime.now());
+// Khớp với thuộc tính hoTenBenhNhan và tenBenhNhan trong LichKham.java
+newLich.setHoTenBenhNhan(fullName);
+newLich.setTenBenhNhan(fullName);
+newLich.setSoDienThoai(phone);
 
-            // Gán bác sĩ theo helper method
-            if (doctorId != null) {
-                newLich.setBacSiId(doctorId);
-            }
+String userEmail = (email != null && !email.isBlank()) ? email : (String) session.getAttribute("userEmail");
+ newLich.setEmail(userEmail);
 
-            // Gán bệnh nhân nếu đang đăng nhập
-            Object userIdObj = session.getAttribute("userId");
-            if (userIdObj != null) {
-                Long userId = Long.valueOf(userIdObj.toString());
-                NguoiDungBenhNhan bn = new NguoiDungBenhNhan();
-                bn.setId(userId);
-                newLich.setBenhNhan(bn);
-            }
+newLich.setTenBacSi(doctorName);
+ newLich.setNgayKham(appointmentDate);
+newLich.setGioKham(timeSlot);
+newLich.setGhiChu(note);
+newLich.setTrangThai("CHO_XAC_NHAN");
+newLich.setNgayDat(LocalDateTime.now());
+newLich.setNgayTao(LocalDateTime.now());
 
-            // Lưu vào CSDL
-            lichKhamService.taoLichKham(newLich);
+// Gán bác sĩ theo helper method
+ if (doctorId != null) {
+newLich.setBacSiId(doctorId);
+ }
 
-            redirectAttributes.addFlashAttribute("thongBaoThanhCong", "Đặt lịch thành công! Vui lòng chờ bác sĩ xử lý.");
-            return "redirect:/lich-su-kham";
+ // Gán bệnh nhân nếu đang đăng nhập (JPA sẽ tự động tự ánh xánh ID thông qua NguoiDungBenhNhan)
+// Gán bệnh nhân nếu đang đăng nhập
+ Object userIdObj = session.getAttribute("userId");
+if (userIdObj != null) {
+Long userId = Long.valueOf(userIdObj.toString());
+NguoiDungBenhNhan bn = new NguoiDungBenhNhan();
+ bn.setId(userId);
+newLich.setBenhNhan(bn);
+ }
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            List<ChuyenKhoa> dsKhoa = chuyenKhoaService.getAllChuyenKhoa();
-            model.addAttribute("dsChuyenKhoa", dsKhoa);
-            model.addAttribute("danhSachChuyenKhoa", dsKhoa);
-            model.addAttribute("danhSachBacSi", bacSiService.getAllBacSi());
-            model.addAttribute("errorMessage", true);
-            model.addAttribute("errorText", "Lỗi đặt lịch: " + e.getMessage());
-            return "dat_lich_kham_benh";
-        }
-    }
+// Lưu vào CSDL
+ lichKhamService.taoLichKham(newLich);
 
-    // =========================================================
-    // 4. QUẢN LÝ LỊCH KHÁM BỆNH NHÂN (LỊCH SỬ ĐĂNG KÝ)
-    // =========================================================
-    @GetMapping({"/lich-su-kham", "/lich_su_kham", "/lich_su_dang_ky", "/lich-su-dang-ky"})
-    public String xemLichSuKham(HttpSession session, Model model) {
-        String userEmail = (String) session.getAttribute("userEmail");
-        Object roleObj = session.getAttribute("userRole");
+redirectAttributes.addFlashAttribute("thongBaoThanhCong", "Đặt lịch thành công! Vui lòng chờ bác sĩ xử lý.");
+ return "redirect:/lich-su-kham";
 
-        if (userEmail == null || (roleObj != null && !"BENH_NHAN".equalsIgnoreCase(roleObj.toString()))) {
-            return "redirect:/dang-nhap";
-        }
+} catch (Exception e) {
+ e.printStackTrace();
+ List<ChuyenKhoa> dsKhoa = chuyenKhoaService.getAllChuyenKhoa();
+ model.addAttribute("dsChuyenKhoa", dsKhoa);
+ model.addAttribute("danhSachChuyenKhoa", dsKhoa);
+model.addAttribute("danhSachBacSi", bacSiService.getAllBacSi());
+model.addAttribute("errorMessage", true);
+ model.addAttribute("errorText", "Lỗi đặt lịch: " + e.getMessage());
+ return "dat_lich_kham_benh";
+ }
+}
 
-        List<LichKham> dsLichKham = lichKhamService.getLichByEmail(userEmail);
-        model.addAttribute("dsLichKham", dsLichKham);
+// =========================================================
+// 4. QUẢN LÝ LỊCH KHÁM BỆNH NHÂN (LỊCH SỬ ĐĂNG KÝ)
+ // =========================================================
+@GetMapping({"/lich-su-kham", "/lich_su_kham", "/lich_su_dang_ky", "/lich-su-dang-ky"})
+public String xemLichSuKham(HttpSession session, Model model) {
+ String userEmail = (String) session.getAttribute("userEmail");
+Object roleObj = session.getAttribute("userRole");
 
-        return "lichsukham";
-    }
+ if (userEmail == null || (roleObj != null && !"BENH_NHAN".equalsIgnoreCase(roleObj.toString()))) {
+ return "redirect:/dang-nhap";
+ }
+
+ List<LichKham> dsLichKham = lichKhamService.getLichByEmail(userEmail);
+ model.addAttribute("dsLichKham", dsLichKham);
+
+ return "lichsukham";
+}
 }
