@@ -101,7 +101,7 @@ public class AdminAuthController {
             session.removeAttribute("adminUser");
             session.removeAttribute("role");
         }
-        return "redirect:/dang_nhap_nhan_vien";
+        return "redirect:/dang-nhap";
     }
 
     @GetMapping("/bac_si/logout")
@@ -111,7 +111,7 @@ public class AdminAuthController {
             session.removeAttribute("doctorId");
             session.removeAttribute("role");
         }
-        return "redirect:/dang_nhap_nhan_vien";
+        return "redirect:/dang-nhap";
     }
 
     @GetMapping("/logout")
@@ -119,6 +119,6 @@ public class AdminAuthController {
         if (session != null) {
             session.invalidate();
         }
-        return "redirect:/dang_nhap_nhan_vien";
+        return "redirect:/dang-nhap";
     }
 }

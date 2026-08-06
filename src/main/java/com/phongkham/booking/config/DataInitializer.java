@@ -49,7 +49,7 @@ public class DataInitializer {
 
             System.out.println(">>> CHECK DB CŨ: Chuyên khoa = " + countKhoa + " | Bác sĩ = " + countBacSi);
 
-            // ==========================================
+        // ==========================================
             // 1. KHỞI TẠO BẢNG CHUYÊN KHOA (NẾU TRỐNG)
             // ==========================================
             if (countKhoa == 0) {
@@ -60,6 +60,7 @@ public class DataInitializer {
                 ck1.setMa_khoa("khoa-noi");
                 ck1.setTenChuyenKhoa("Khoa Nội");
                 ck1.setTen_chuyen_khoa("Khoa Nội Tổng Hợp");
+                ck1.setHinhAnh("/images/anh_bia.jpeg"); // Gán ảnh bìa chung
                 ck1.setMoTa("Chẩn đoán và điều trị chuyên sâu các bệnh lý cơ quan nội tạng.");
                 ck1.setPhu_de_banner("Trung tâm tiếp nhận, chẩn đoán và điều trị nội khoa toàn diện tại Phòng khám.");
                 ck1.setDoan_gioi_thieu("<strong>Khoa Nội</strong> là chuyên khoa lâm sàng chuyên tiếp nhận, chẩn đoán và điều trị toàn diện các bệnh lý xảy ra ở các cơ quan bên trong cơ thể bằng phương pháp sử dụng thuốc, kết hợp điều chỉnh chế độ dinh dưỡng và lối sống mà hoàn toàn không can thiệp bằng phẫu thuật.");
@@ -80,6 +81,7 @@ public class DataInitializer {
                 ck2.setMa_khoa("khoa-ngoai");
                 ck2.setTenChuyenKhoa("Khoa Ngoại");
                 ck2.setTen_chuyen_khoa("Khoa Ngoại Tổng Hợp");
+                ck2.setHinhAnh("/images/anh_bia.jpeg"); // Gán ảnh bìa chung
                 ck2.setMoTa("Tư vấn, chẩn đoán và thực hiện các phẫu thuật từ tiểu phẫu đến đại phẫu.");
                 ck2.setPhu_de_banner("Trung tâm chẩn đoán, điều trị và phẫu thuật ngoại khoa an toàn.");
                 ck2.setDoan_gioi_thieu("<strong>Khoa Ngoại</strong> là chuyên khoa lâm sàng chuyên chẩn đoán, điều trị và sửa chữa các tổn thương, dị tật hoặc bệnh lý của các cơ quan trong cơ thể bằng phương pháp phẫu thuật hoặc thủ thuật can thiệp trực tiếp.");
@@ -98,6 +100,7 @@ public class DataInitializer {
                 ck3.setMa_khoa("khoa-mat");
                 ck3.setTenChuyenKhoa("Khoa Mắt");
                 ck3.setTen_chuyen_khoa("Khoa Mắt Chuyên Sâu");
+                ck3.setHinhAnh("/images/anh_bia.jpeg"); // Gán ảnh bìa chung
                 ck3.setMoTa("Chăm sóc toàn diện thị lực, đo khúc xạ và điều trị các bệnh về mắt.");
                 ck3.setPhu_de_banner("Trung tâm chăm sóc, chẩn đoán và điều trị toàn diện các bệnh lý về mắt.");
                 ck3.setDoan_gioi_thieu("<strong>Khoa Mắt</strong> chuyên thăm khám, chẩn đoán, điều trị và chăm sóc toàn diện cho các bệnh lý, tật khúc xạ cùng các tổn thương liên quan đến mắt và thị giác.");
@@ -116,6 +119,7 @@ public class DataInitializer {
                 ck4.setMa_khoa("khoa-da-lieu");
                 ck4.setTenChuyenKhoa("Khoa Da Liễu");
                 ck4.setTen_chuyen_khoa("Khoa Da Liễu & Thẩm Mỹ Da");
+                ck4.setHinhAnh("/images/anh_bia.jpeg"); // Gán ảnh bìa chung
                 ck4.setMoTa("Điều trị các bệnh lý về da, tóc, móng và tư vấn chăm sóc da chuyên sâu.");
                 ck4.setPhu_de_banner("Trung tâm chăm sóc, điều trị chuyên sâu và phục hồi sức khỏe làn da.");
                 ck4.setDoan_gioi_thieu("<strong>Khoa Da liễu</strong> chuyên thăm khám, chẩn đoán, điều trị và chăm sóc toàn diện cho các bệnh lý về da, lông, tóc, móng và các bệnh lây truyền qua đường tình dục.");
@@ -134,6 +138,7 @@ public class DataInitializer {
                 ck5.setMa_khoa("rang-ham-mat");
                 ck5.setTenChuyenKhoa("Khoa Răng-Hàm-Mặt");
                 ck5.setTen_chuyen_khoa("Khoa Răng - Hàm - Mặt");
+                ck5.setHinhAnh("/images/anh_bia.jpeg"); // Gán ảnh bìa chung
                 ck5.setMoTa("Dịch vụ nha khoa thẩm mỹ, chăm sóc răng miệng và phẫu thuật hàm mặt.");
                 ck5.setPhu_de_banner("Trung tâm chăm sóc nụ cười, điều trị và phục hình thẩm mỹ nha khoa cao cấp.");
                 ck5.setDoan_gioi_thieu("<strong>Khoa Răng - Hàm - Mặt</strong> chuyên thăm khám, chẩn đoán, điều trị và phục hình các bệnh lý, dị tật hoặc tổn thương liên quan đến răng, xương hàm và khoang miệng.");
@@ -165,33 +170,33 @@ public class DataInitializer {
                 List<BacSiData> ds = new ArrayList<>();
 
                 // === 1. KHOA NỘI (5 Bác sĩ) ===
-                ds.add(new BacSiData("TS.BS", "Nguyễn Văn Minh", "Khoa Nội", 15, 300000, "/images/bs1.jpg"));
-                ds.add(new BacSiData("ThS.BS", "Lê Thị Lan", "Khoa Nội", 10, 250000, "/images/bs4.jpg"));
-                ds.add(new BacSiData("BS.CKII", "Trần Thanh Tùng", "Khoa Nội", 12, 280000, "/images/bs3.jpg"));
-                ds.add(new BacSiData("BS.CKI", "Phạm Thị Mai", "Khoa Nội", 8, 200000, "/images/bs5.jpg"));
-                ds.add(new BacSiData("BS", "Hoàng Văn Hải", "Khoa Nội", 5, 150000, "/images/bs2.jpg"));
+                ds.add(new BacSiData("TS.BS", "Nguyễn Văn Minh", "Khoa Nội", 15, 300000, "/bs1.jpg"));
+                ds.add(new BacSiData("ThS.BS", "Lê Thị Lan", "Khoa Nội", 10, 250000, "/bs4.jpg"));
+                ds.add(new BacSiData("BS.CKII", "Trần Thanh Tùng", "Khoa Nội", 12, 280000, "/bs3.jpg"));
+                ds.add(new BacSiData("BS.CKI", "Phạm Thị Mai", "Khoa Nội", 8, 200000, "/bs5.jpg"));
+                ds.add(new BacSiData("BS", "Hoàng Văn Hải", "Khoa Nội", 5, 150000, "/bs2.jpg"));
 
                 // === 2. KHOA NGOẠI (5 Bác sĩ) ===
-                ds.add(new BacSiData("BS.CKII", "Trần Quốc Dũng", "Khoa Ngoại", 16, 350000, "/images/bs6.jpg"));
-                ds.add(new BacSiData("ThS.BS", "Phạm Anh Tú", "Khoa Ngoại", 9, 250000, "/images/bs7.jpg"));
-                ds.add(new BacSiData("BS.CKI", "Ngô Văn Đức", "Khoa Ngoại", 7, 200000, "/images/bs8.jpg"));
-                ds.add(new BacSiData("BS.CKI", "Lê Hoàng Nam", "Khoa Ngoại", 8, 200000, "/images/bs9.jpg"));
-                ds.add(new BacSiData("BS", "Vũ Đình Khoa", "Khoa Ngoại", 4, 150000, "/images/bs10.jpg"));
+                ds.add(new BacSiData("BS.CKII", "Trần Quốc Dũng", "Khoa Ngoại", 16, 350000, "/bs6.jpg"));
+                ds.add(new BacSiData("ThS.BS", "Phạm Anh Tú", "Khoa Ngoại", 9, 250000, "/bs7.jpg"));
+                ds.add(new BacSiData("BS.CKI", "Ngô Văn Đức", "Khoa Ngoại", 7, 200000, "/bs8.jpg"));
+                ds.add(new BacSiData("BS.CKI", "Lê Hoàng Nam", "Khoa Ngoại", 8, 200000, "/bs9.jpg"));
+                ds.add(new BacSiData("BS", "Vũ Đình Khoa", "Khoa Ngoại", 4, 150000, "/bs10.jpg"));
 
                 // === 3. KHOA MẮT (3 Bác sĩ) ===
-                ds.add(new BacSiData("BS.CKI", "Hoàng Mai Hoa", "Khoa Mắt", 9, 220000, "/images/bs13.jpg"));
-                ds.add(new BacSiData("ThS.BS", "Đỗ Minh Khang", "Khoa Mắt", 11, 260000, "/images/bs12.jpg"));
-                ds.add(new BacSiData("BS", "Nguyễn Phương Thảo", "Khoa Mắt", 5, 150000, "/images/bs11.jpg"));
+                ds.add(new BacSiData("BS.CKI", "Hoàng Mai Hoa", "Khoa Mắt", 9, 220000, "/bs13.jpg"));
+                ds.add(new BacSiData("ThS.BS", "Đỗ Minh Khang", "Khoa Mắt", 11, 260000, "/bs12.jpg"));
+                ds.add(new BacSiData("BS", "Nguyễn Phương Thảo", "Khoa Mắt", 5, 150000, "/bs11.jpg"));
 
                 // === 4. KHOA DA LIỄU (3 Bác sĩ) ===
-                ds.add(new BacSiData("TS.BS", "Trần Thu Hà", "Khoa Da Liễu", 14, 320000, "/images/bs1.jpg"));
-                ds.add(new BacSiData("BS.CKII", "Nguyễn Văn An", "Khoa Da Liễu", 13, 300000, "/images/bs2.jpg"));
-                ds.add(new BacSiData("ThS.BS", "Lê Hoàng Anh", "Khoa Da Liễu", 8, 220000, "/images/bs3.jpg"));
+                ds.add(new BacSiData("TS.BS", "Trần Thu Hà", "Khoa Da Liễu", 14, 320000, "/bs18.jpg"));
+                ds.add(new BacSiData("BS.CKII", "Nguyễn Văn An", "Khoa Da Liễu", 13, 300000, "/bs17.jpg"));
+                ds.add(new BacSiData("ThS.BS", "Lê Hoàng Anh", "Khoa Da Liễu", 8, 220000, "/bs19.jpg"));
 
                 // === 5. KHOA RĂNG HÀM MẶT (3 Bác sĩ) ===
-                ds.add(new BacSiData("ThS.BS", "Vũ Hoàng Nam", "Khoa Răng-Hàm-Mặt", 10, 250000, "/images/bs14.jpg"));
-                ds.add(new BacSiData("BS.CKI", "Trịnh Bảo Ngọc", "Khoa Răng-Hàm-Mặt", 7, 200000, "/images/bs15.jpg"));
-                ds.add(new BacSiData("BS", "Bùi Anh Tuấn", "Khoa Răng-Hàm-Mặt", 4, 150000, "/images/bs16.jpg"));
+                ds.add(new BacSiData("ThS.BS", "Vũ Hoàng Nam", "Khoa Răng-Hàm-Mặt", 10, 250000, "/bs14.jpg"));
+                ds.add(new BacSiData("BS.CKI", "Trịnh Bảo Ngọc", "Khoa Răng-Hàm-Mặt", 7, 200000, "/bs15.jpg"));
+                ds.add(new BacSiData("BS", "Bùi Anh Tuấn", "Khoa Răng-Hàm-Mặt", 4, 150000, "/bs16.jpg"));
 
                 long startId = 12345678L;
                 List<BacSi> listBacSi = new ArrayList<>();

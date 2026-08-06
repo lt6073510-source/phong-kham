@@ -37,12 +37,7 @@
 
         <!-- Danh sách lịch khám -->
         <div class="card card-custom p-4">
-            <div th:if="${#lists.isEmpty(danhSachLich)}" class="text-center py-5">
-                <i class="fa-solid fa-calendar-xmark text-muted fs-1 mb-3"></i>
-                <p class="text-muted">Bạn chưa có lịch đăng ký khám nào trên tài khoản này.</p>
-            </div>
-
-            <div class="table-responsive" th:unless="${#lists.isEmpty(danhSachLich)}">
+            <div class="table-responsive">
                 <table class="table table-hover align-middle">
                     <thead class="table-light">
                         <tr>
@@ -55,22 +50,28 @@
                         </tr>
                     </thead>
                     <tbody>
+                        <tr th:if="${#lists.isEmpty(danhSachLich)}">
+                            <td colspan="6" class="text-center text-muted py-4">
+                                <i class="fa-solid fa-calendar-xmark me-2"></i> Bạn chưa có lịch đăng ký khám nào trên tài khoản này.
+                            </td>
+                        </tr>
                         <tr th:each="lich : ${danhSachLich}">
                             <td class="fw-bold" th:text="'#' + ${lich.id}"></td>
-                            <td th:text="${lich.hoTen}"></td>
+                            <td th:text="${lich.tenBenhNhan != null ? lich.tenBenhNhan : lich.hoTenBenhNhan}"></td>
                             <td th:text="${lich.ngayKham}"></td>
                             <td th:text="${lich.gioKham}"></td>
                             <td>
-                                <span th:if="${lich.status == 'CHO_XAC_NHAN'}" class="badge bg-warning text-dark">Chờ khám</span>
-                                <span th:if="${lich.status == 'DA_HUY'}" class="badge bg-danger">Đã hủy</span>
-                                <span th:if="${lich.status == 'DA_DOI_LICH'}" class="badge bg-info">Đã đổi lịch</span>
+                                <span th:if="${lich.trangThai == 'CHO_XAC_NHAN'}" class="badge bg-warning text-dark">Chờ khám</span>
+                                <span th:if="${lich.trangThai == 'DA_HUY'}" class="badge bg-danger">Đã hủy</span>
+                                <span th:if="${lich.trangThai == 'DA_DOI_LICH'}" class="badge bg-info">Đã đổi lịch</span>
+                                <span th:if="${lich.trangThai == 'DA_XAC_NHAN'}" class="badge bg-success">Đã xác nhận</span>
                             </td>
                             <td class="text-center">
-                                <div th:if="${lich.status != 'DA_HUY'}" class="d-flex justify-content-center gap-2">
+                                <div th:if="${lich.trangThai != 'DA_HUY'}" class="d-flex justify-content-center gap-2">
                                     <button class="btn btn-outline-danger btn-sm rounded-pill px-3" th:onclick="'openCancelModal(' + ${lich.id} + ')'">Hủy</button>
                                     <button class="btn btn-outline-primary btn-sm rounded-pill px-3" th:onclick="'openEditModal(' + ${lich.id} + ')'">Đổi lịch</button>
                                 </div>
-                                <span th:unless="${lich.status != 'DA_HUY'}" class="text-muted small fst-italic">Đã hủy</span>
+                                <span th:if="${lich.trangThai == 'DA_HUY'}" class="text-muted small fst-italic">Đã hủy</span>
                             </td>
                         </tr>
                     </tbody>

@@ -86,6 +86,10 @@
             <div class="col-lg-10">
                 <div class="card card-custom p-4 p-md-5">
                     
+                    <!-- Hiển thị thông báo thành công / lỗi nếu có (Flash attributes) -->
+                    <div th:if="${thongBaoThanhCong != null}" class="alert alert-success" th:text="${thongBaoThanhCong}"></div>
+                    <div th:if="${errorText != null}" class="alert alert-danger" th:text="${errorText}"></div>
+
                     <form th:action="@{/dat-lich-kham}" method="POST" id="appointmentForm">
                         
                         <!-- SECTION 1: THÔNG TIN BỆNH NHÂN -->
@@ -226,5 +230,66 @@
             });
         });
     </script>
+    <!-- Modal thông báo đặt lịch thành công -->
+    <div class="modal fade" id="bookingSuccessModal" tabindex="-1" aria-labelledby="bookingSuccessModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title text-success" id="bookingSuccessModalLabel"><i class="fa-solid fa-circle-check me-2"></i>Chúc mừng!</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body py-4 text-center">
+                    <p class="mb-3 fw-semibold" id="bookingSuccessMessage">Bạn đã đặt lịch thành công.</p>
+                    <p class="text-muted">Thông tin lịch khám sẽ được lưu trong Hệ thống.</p>
+                    <button type="button" class="btn btn-success rounded-pill px-4" data-bs-dismiss="modal">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('appointmentForm');
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const successModalEl = document.getElementById('bookingSuccessModal');
+            const successMessageEl = document.getElementById('bookingSuccessMessage');
+            const successModal = new bootstrap.Modal(successModalEl);
+
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>Đang gửi...';
+
+                const data = new URLSearchParams(new FormData(form));
+
+                fetch('/api/dat-lich', {
+                    method: 'POST',
+                    headers: { 'Accept': 'application/json' },
+                    body: data
+                })
+                .then(async res => {
+                    const json = await res.json().catch(() => ({ success: false, message: 'Lỗi phản hồi từ server' }));
+                    if (res.ok && json.success) {
+                        successMessageEl.textContent = json.message || 'Chúc mừng bạn đã đặt lịch thành công!';
+                        successModal.show();
+                        form.reset();
+                    } else {
+                        successMessageEl.textContent = json.message || 'Không thể đặt lịch, vui lòng thử lại.';
+                        successModal.show();
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    successMessageEl.textContent = 'Lỗi kết nối tới server. Vui lòng thử lại.';
+                    successModal.show();
+                })
+                .finally(() => {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane me-1"></i> Xác Nhận Đặt Lịch';
+                });
+            });
+        });
+    </script>
+
 </body>
 </html>

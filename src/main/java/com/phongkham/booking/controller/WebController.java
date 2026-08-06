@@ -12,6 +12,7 @@ import com.phongkham.booking.service.LichKhamService;
 
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,7 +23,10 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-
+import java.util.Map;
+import java.util.HashMap;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 public class WebController {
 
@@ -41,6 +45,7 @@ public class WebController {
  @Autowired
  private BacSiService bacSiService;
 
+ 
  // =========================================================
  // 1. CÁC TRANG GIAO DIỆN CHUNG & TĨNH
  // =========================================================
@@ -70,6 +75,40 @@ public String xuLyDangNhap(@RequestParam String email,
 HttpSession session,
 RedirectAttributes redirectAttributes) {
 
+    BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+
+    // Load admin hashes from env vars (recommended)
+    String admin1Email = System.getenv("APP_ADMIN1_EMAIL");
+    String admin1Hash  = System.getenv("APP_ADMIN1_PASS_HASH");
+    String admin2Email = System.getenv("APP_ADMIN2_EMAIL");
+    String admin2Hash  = System.getenv("APP_ADMIN2_PASS_HASH");
+
+    // Fallback hard-coded to the two admins you provided (no env vars required)
+    if ((admin1Email == null || admin1Hash == null) && (admin2Email == null || admin2Hash == null)) {
+        admin1Email = "admin1";
+        admin1Hash  = encoder.encode("AdminPass123!");
+        admin2Email = "admin2";
+        admin2Hash  = encoder.encode("AdminPass456!");
+    }
+
+    // Check admin1
+    if (admin1Email != null && admin1Email.equalsIgnoreCase(email) && admin1Hash != null && encoder.matches(matKhau, admin1Hash)) {
+        session.setAttribute("userLuuSinh", null);
+        session.setAttribute("userEmail", admin1Email);
+        session.setAttribute("userName", "Administrator");
+        session.setAttribute("userRole", "ADMIN");
+        return "redirect:/admin";
+    }
+
+    // Check admin2
+    if (admin2Email != null && admin2Email.equalsIgnoreCase(email) && admin2Hash != null && encoder.matches(matKhau, admin2Hash)) {
+        session.setAttribute("userLuuSinh", null);
+        session.setAttribute("userEmail", admin2Email);
+        session.setAttribute("userName", "Administrator");
+        session.setAttribute("userRole", "ADMIN");
+        return "redirect:/admin";
+    }
+
     Optional<NguoiDungBenhNhan> userOpt = khoNguoiDungBenhNhan.findByEmail(email);
 
  if (userOpt.isPresent() && userOpt.get().getMatKhau().equals(matKhau)) {
@@ -95,9 +134,9 @@ session.setAttribute("userId", user.getId());
  String vaiTro = bs.getVaiTro() != null ? bs.getVaiTro().toUpperCase() : "BAC_SI";
  session.setAttribute("userRole", vaiTro);
 
- if ("ADMIN".equals(vaiTro)) {
- return "redirect:/admin/dashboard";
- } else {
+    if ("ADMIN".equals(vaiTro)) {
+    return "redirect:/admin";
+    } else {
  return "redirect:/bac-si/dashboard";
  }
  }
@@ -167,18 +206,17 @@ model.addAttribute("danhSachChuyenKhoa", dsKhoa);
 
  @PostMapping({"/dat-lich/luu", "/dat-lich-kham"})
 public String luuLichKham(
-@RequestParam(name = "fullName", required = false) String fullName,
-@RequestParam(name = "phone", required = false) String phone,
- @RequestParam(name = "email", required = false) String email,
-@RequestParam(name = "department", required = false) String department,
- @RequestParam(name = "doctorName", required = false) String doctorName,
-@RequestParam(name = "doctorId", required = false) Long doctorId,
-@RequestParam(name = "appointmentDate", required = false) String appointmentDate,
- @RequestParam(name = "timeSlot", required = false) String timeSlot,
-@RequestParam(name = "note", required = false) String note,
-HttpSession session,
-RedirectAttributes redirectAttributes,
- Model model) {
+    @RequestParam(name = "fullName", required = false) String fullName,
+    @RequestParam(name = "phone", required = false) String phone,
+    @RequestParam(name = "email", required = false) String email,
+    @RequestParam(name = "departmentId", required = false) Integer departmentId,
+    @RequestParam(name = "doctorId", required = false) Long doctorId,
+    @RequestParam(name = "appointmentDate", required = false) String appointmentDate,
+    @RequestParam(name = "appointmentTime", required = false) String appointmentTime,
+    @RequestParam(name = "symptoms", required = false) String symptoms,
+    HttpSession session,
+    RedirectAttributes redirectAttributes,
+    Model model) {
 
 try {
 LichKham newLich = new LichKham();
@@ -191,18 +229,28 @@ newLich.setSoDienThoai(phone);
 String userEmail = (email != null && !email.isBlank()) ? email : (String) session.getAttribute("userEmail");
  newLich.setEmail(userEmail);
 
-newLich.setTenBacSi(doctorName);
- newLich.setNgayKham(appointmentDate);
-newLich.setGioKham(timeSlot);
-newLich.setGhiChu(note);
+            // Nếu có doctorId thì gán, đồng thời cố gắng lấy tên bác sĩ nếu cần
+            if (doctorId != null) {
+                newLich.setBacSiId(doctorId);
+                // lấy tên bác sĩ để hiển thị (không bắt buộc)
+                bacSiService.getBacSiById(doctorId.intValue()).ifPresent(bs -> newLich.setTenBacSi(bs.getHoTen()));
+            }
+
+            newLich.setNgayKham(appointmentDate);
+            // form gửi appointmentTime
+            newLich.setGioKham(appointmentTime != null ? appointmentTime : "");
+            newLich.setGhiChu(symptoms != null ? symptoms : "");
 newLich.setTrangThai("CHO_XAC_NHAN");
 newLich.setNgayDat(LocalDateTime.now());
 newLich.setNgayTao(LocalDateTime.now());
 
-// Gán bác sĩ theo helper method
- if (doctorId != null) {
-newLich.setBacSiId(doctorId);
- }
+            // Gán chuyên khoa nếu gửi departmentId (không bắt buộc)
+            if (departmentId != null) {
+                ChuyenKhoa ck = chuyenKhoaService.getChuyenKhoaById(departmentId).orElse(null);
+                if (ck != null) {
+                    newLich.setChuyenKhoaId(ck.getId().longValue());
+                }
+            }
 
  // Gán bệnh nhân nếu đang đăng nhập (JPA sẽ tự động tự ánh xánh ID thông qua NguoiDungBenhNhan)
 // Gán bệnh nhân nếu đang đăng nhập
@@ -215,10 +263,17 @@ newLich.setBenhNhan(bn);
  }
 
 // Lưu vào CSDL
- lichKhamService.taoLichKham(newLich);
+            lichKhamService.taoLichKham(newLich);
 
-redirectAttributes.addFlashAttribute("thongBaoThanhCong", "Đặt lịch thành công! Vui lòng chờ bác sĩ xử lý.");
- return "redirect:/lich-su-kham";
+            // Nếu người dùng đã đăng nhập là bệnh nhân, chuyển sang lịch sử; nếu không, trở lại trang đặt lịch và hiển thị thông báo
+            Object roleObj = session.getAttribute("userRole");
+            redirectAttributes.addFlashAttribute("thongBaoThanhCong", "Đặt lịch thành công! Vui lòng chờ bác sĩ xử lý.");
+            if (roleObj != null && "BENH_NHAN".equalsIgnoreCase(roleObj.toString())) {
+                return "redirect:/lich-su-kham";
+            } else {
+                return "redirect:/dat-lich-kham";
+            }
+
 
 } catch (Exception e) {
  e.printStackTrace();
@@ -232,6 +287,69 @@ model.addAttribute("errorMessage", true);
  }
 }
 
+    // API để xử lý đặt lịch qua AJAX, trả về JSON (giữ luồng ở trang đặt lịch)
+    @PostMapping("/api/dat-lich")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> apiDatLich(
+            @RequestParam(name = "fullName", required = false) String fullName,
+            @RequestParam(name = "phone", required = false) String phone,
+            @RequestParam(name = "email", required = false) String email,
+            @RequestParam(name = "departmentId", required = false) Integer departmentId,
+            @RequestParam(name = "doctorId", required = false) Long doctorId,
+            @RequestParam(name = "appointmentDate", required = false) String appointmentDate,
+            @RequestParam(name = "appointmentTime", required = false) String appointmentTime,
+            @RequestParam(name = "symptoms", required = false) String symptoms,
+            HttpSession session) {
+
+        Map<String, Object> resp = new HashMap<>();
+        try {
+            LichKham newLich = new LichKham();
+
+            newLich.setHoTenBenhNhan(fullName);
+            newLich.setTenBenhNhan(fullName);
+            newLich.setSoDienThoai(phone);
+
+            String userEmail = (email != null && !email.isBlank()) ? email : (String) session.getAttribute("userEmail");
+            newLich.setEmail(userEmail);
+
+            if (doctorId != null) {
+                newLich.setBacSiId(doctorId);
+                bacSiService.getBacSiById(doctorId.intValue()).ifPresent(bs -> newLich.setTenBacSi(bs.getHoTen()));
+            }
+
+            newLich.setNgayKham(appointmentDate);
+            newLich.setGioKham(appointmentTime != null ? appointmentTime : "");
+            newLich.setGhiChu(symptoms != null ? symptoms : "");
+            newLich.setTrangThai("CHO_XAC_NHAN");
+            newLich.setNgayDat(LocalDateTime.now());
+            newLich.setNgayTao(LocalDateTime.now());
+
+            if (departmentId != null) {
+                ChuyenKhoa ck = chuyenKhoaService.getChuyenKhoaById(departmentId).orElse(null);
+                if (ck != null) newLich.setChuyenKhoaId(ck.getId().longValue());
+            }
+
+            Object userIdObj = session.getAttribute("userId");
+            if (userIdObj != null) {
+                Long userId = Long.valueOf(userIdObj.toString());
+                NguoiDungBenhNhan bn = new NguoiDungBenhNhan();
+                bn.setId(userId);
+                newLich.setBenhNhan(bn);
+            }
+
+            lichKhamService.taoLichKham(newLich);
+
+            resp.put("success", true);
+            resp.put("message", "Đặt lịch thành công! Vui lòng chờ bác sĩ xử lý.");
+            return ResponseEntity.ok(resp);
+        } catch (Exception e) {
+            e.printStackTrace();
+            resp.put("success", false);
+            resp.put("message", "Lỗi khi đặt lịch: " + e.getMessage());
+            return ResponseEntity.status(500).body(resp);
+        }
+    }
+
 // =========================================================
 // 4. QUẢN LÝ LỊCH KHÁM BỆNH NHÂN (LỊCH SỬ ĐĂNG KÝ)
  // =========================================================
@@ -244,9 +362,12 @@ Object roleObj = session.getAttribute("userRole");
  return "redirect:/dang-nhap";
  }
 
- List<LichKham> dsLichKham = lichKhamService.getLichByEmail(userEmail);
- model.addAttribute("dsLichKham", dsLichKham);
+    List<LichKham> dsLichKham = lichKhamService.getLichByEmail(userEmail);
+    model.addAttribute("dsLichKham", dsLichKham);
+    model.addAttribute("danhSachLich", dsLichKham);
+    model.addAttribute("userEmail", userEmail);
 
- return "lichsukham";
+    // Template file in resources is named `lich_su_dang_ky.html` — return that view name
+    return "lich_su_dang_ky";
 }
 }

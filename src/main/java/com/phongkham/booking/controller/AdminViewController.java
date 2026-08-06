@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.Optional;
+import java.util.List;
+import java.util.ArrayList;
 
 @Controller
 @RequestMapping("/admin")
@@ -42,10 +44,70 @@ public class AdminViewController {
     @PostMapping("/chuyen-khoa/them")
     public String themChuyenKhoa(@ModelAttribute("chuyenKhoaMoi") ChuyenKhoa chuyenKhoa, RedirectAttributes redirectAttributes) {
         try {
+            // Nếu admin chỉ nhập tên & mô tả (form ngắn), tự động sinh các trường phụ để giao diện không bị trống
+            String ten = chuyenKhoa.getTenChuyenKhoa();
+            String moTa = chuyenKhoa.getMoTa();
+
+            if (ten == null || ten.isBlank()) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Tên chuyên khoa không được để trống!");
+                return "redirect:/admin#tab-chuyenkhoa";
+            }
+
+            // Chỉ đặt các giá trị mặc định khi chưa có dữ liệu do admin nhập
+            if (chuyenKhoa.getTen_chuyen_khoa() == null || chuyenKhoa.getTen_chuyen_khoa().isBlank()) {
+                chuyenKhoa.setTen_chuyen_khoa(ten + " Chuyên Sâu");
+            }
+
+            if (chuyenKhoa.getHinhAnh() == null || chuyenKhoa.getHinhAnh().isBlank()) {
+                // Thay đường dẫn thành file thực tế trong /static
+                chuyenKhoa.setHinhAnh("/anh_bia.jpeg");
+            }
+
+            if (chuyenKhoa.getPhu_de_banner() == null || chuyenKhoa.getPhu_de_banner().isBlank()) {
+                chuyenKhoa.setPhu_de_banner("Trung tâm tiếp nhận, chẩn đoán và điều trị " + ten + " toàn diện tại Phòng khám.");
+            }
+
+            if (chuyenKhoa.getDoan_gioi_thieu() == null || chuyenKhoa.getDoan_gioi_thieu().isBlank()) {
+                chuyenKhoa.setDoan_gioi_thieu("<strong>" + ten + "</strong> chuyên tiếp nhận, chẩn đoán và điều trị toàn diện các bệnh lý. " + (moTa != null ? moTa : ""));
+            }
+
+            if (chuyenKhoa.getTieu_de_hang_muc() == null || chuyenKhoa.getTieu_de_hang_muc().isBlank()) {
+                chuyenKhoa.setTieu_de_hang_muc("Các hạng mục thăm khám và điều trị chính");
+            }
+
+            if (chuyenKhoa.getLoi_ket() == null || chuyenKhoa.getLoi_ket().isBlank()) {
+                chuyenKhoa.setLoi_ket(ten + " đóng vai trò quan trọng trong việc chăm sóc và bảo vệ sức khỏe toàn diện cho bệnh nhân.");
+            }
+
+            // Sinh mã khoa (slug) nếu chưa có
+            if (chuyenKhoa.getMaKhoa() == null || chuyenKhoa.getMaKhoa().isBlank()) {
+                String maKhoa = ten.toLowerCase()
+                        .trim()
+                        .replaceAll("[áàảãạâấầẩẫậăắằẳẵặ]", "a")
+                        .replaceAll("[đ]", "d")
+                        .replaceAll("[éèẻẽẹêếềểễệ]", "e")
+                        .replaceAll("[óòỏõọôốồổỗộơớờởỡợ]", "o")
+                        .replaceAll("[úùủũụưứừửữự]", "u")
+                        .replaceAll("[íìỉĩị]", "i")
+                        .replaceAll("[ýỳỷỹỵ]", "y")
+                        .replaceAll("[^a-z0-9]", "-")
+                        .replaceAll("-+", "-");
+                chuyenKhoa.setMa_khoa(maKhoa);
+            }
+
+            // Nếu không có hạng mục, tự thêm 2 hạng mục mặc định
+            if (chuyenKhoa.getDanh_sach_hang_muc() == null || chuyenKhoa.getDanh_sach_hang_muc().isEmpty()) {
+                List<com.phongkham.booking.entity.HangMuc> defaultHangMuc = new ArrayList<>();
+                defaultHangMuc.add(new com.phongkham.booking.entity.HangMuc("🩺", "Thăm khám & Tầm soát", "Khám lâm sàng và đánh giá tổng quát các triệu chứng ban đầu."));
+                defaultHangMuc.add(new com.phongkham.booking.entity.HangMuc("💊", "Điều trị chuyên khoa", "Đưa ra phác đồ điều trị nội khoa chuẩn y khoa và theo dõi sát sao."));
+                chuyenKhoa.setDanh_sach_hang_muc(defaultHangMuc);
+            }
+
             chuyenKhoaService.taoChuyenKhoa(chuyenKhoa);
             redirectAttributes.addFlashAttribute("successMessage", "Thêm chuyên khoa thành công!");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Không thể thêm chuyên khoa!");
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("errorMessage", "Không thể thêm chuyên khoa: " + e.getMessage());
         }
         return "redirect:/admin#tab-chuyenkhoa";
     }

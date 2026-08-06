@@ -129,15 +129,15 @@
             
             <div class="auth-buttons">
                 <!-- Hiển thị khi CHƯA đăng nhập -->
-                <th:block th:if="${session.tenNguoiDung == null}">
+                <th:block th:if="${session.userName == null}">
                     <a href="/dang_nhap" class="btn-login">Đăng nhập</a>
                     <a href="/dang_ky" class="btn-register">Đăng ký</a>
                 </th:block>
 
                 <!-- Hiển thị khi ĐÃ đăng nhập -->
-                <th:block th:if="${session.tenNguoiDung != null}">
+                <th:block th:if="${session.userName != null}">
                     <div class="user-dropdown-container">
-                        <div class="user-welcome" th:text="'Xin chào, ' + ${session.tenNguoiDung}">Xin chào, User</div>
+                        <div class="user-welcome" th:text="'Xin chào, ' + ${session.userName}">Xin chào, User</div>
                         <ul class="user-dropdown-menu">
                             <li><a href="/dang_xuat">Đăng xuất</a></li>
                         </ul>
