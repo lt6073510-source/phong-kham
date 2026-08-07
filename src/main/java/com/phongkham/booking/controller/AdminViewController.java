@@ -2,6 +2,8 @@ package com.phongkham.booking.controller;
 
 import com.phongkham.booking.entity.*;
 import com.phongkham.booking.service.*;
+import jakarta.servlet.http.HttpSession;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
@@ -28,9 +30,22 @@ public class AdminViewController {
         this.lichKhamService = lichKhamService;
     }
 
+    // Hàm tiện ích kiểm tra quyền Admin
+    private boolean checkAdminSession(HttpSession session) {
+        if (session == null) return false;
+        String adminUser = (String) session.getAttribute("adminUser");
+        String userRole = (String) session.getAttribute("userRole");
+        return (adminUser != null || "ADMIN".equalsIgnoreCase(userRole));
+    }
+
     // 1. TRANG DASHBOARD CHÍNH CỦA ADMIN
     @GetMapping
-    public String adminPage(Model model) {
+    public String adminPage(HttpSession session, Model model) {
+        // ĐÃ BỔ SUNG: Kiểm tra Session Admin, nếu chưa đăng nhập sẽ đá về trang /dang_nhap
+        if (!checkAdminSession(session)) {
+            return "redirect:/dang_nhap";
+        }
+
         model.addAttribute("dsChuyenKhoa", chuyenKhoaService.getAllChuyenKhoa());
         model.addAttribute("dsBacSi", bacSiService.getAllBacSi());
         model.addAttribute("dsLichKham", lichKhamService.getAllLichKham(null));
@@ -42,9 +57,12 @@ public class AdminViewController {
 
     // --- QUẢN LÝ CHUYÊN KHOA ---
     @PostMapping("/chuyen-khoa/them")
-    public String themChuyenKhoa(@ModelAttribute("chuyenKhoaMoi") ChuyenKhoa chuyenKhoa, RedirectAttributes redirectAttributes) {
+    public String themChuyenKhoa(@ModelAttribute("chuyenKhoaMoi") ChuyenKhoa chuyenKhoa, 
+                                HttpSession session,
+                                RedirectAttributes redirectAttributes) {
+        if (!checkAdminSession(session)) return "redirect:/dang_nhap";
+
         try {
-            // Nếu admin chỉ nhập tên & mô tả (form ngắn), tự động sinh các trường phụ để giao diện không bị trống
             String ten = chuyenKhoa.getTenChuyenKhoa();
             String moTa = chuyenKhoa.getMoTa();
 
@@ -53,13 +71,11 @@ public class AdminViewController {
                 return "redirect:/admin#tab-chuyenkhoa";
             }
 
-            // Chỉ đặt các giá trị mặc định khi chưa có dữ liệu do admin nhập
             if (chuyenKhoa.getTen_chuyen_khoa() == null || chuyenKhoa.getTen_chuyen_khoa().isBlank()) {
                 chuyenKhoa.setTen_chuyen_khoa(ten + " Chuyên Sâu");
             }
 
             if (chuyenKhoa.getHinhAnh() == null || chuyenKhoa.getHinhAnh().isBlank()) {
-                // Thay đường dẫn thành file thực tế trong /static
                 chuyenKhoa.setHinhAnh("/anh_bia.jpeg");
             }
 
@@ -79,7 +95,6 @@ public class AdminViewController {
                 chuyenKhoa.setLoi_ket(ten + " đóng vai trò quan trọng trong việc chăm sóc và bảo vệ sức khỏe toàn diện cho bệnh nhân.");
             }
 
-            // Sinh mã khoa (slug) nếu chưa có
             if (chuyenKhoa.getMaKhoa() == null || chuyenKhoa.getMaKhoa().isBlank()) {
                 String maKhoa = ten.toLowerCase()
                         .trim()
@@ -95,7 +110,6 @@ public class AdminViewController {
                 chuyenKhoa.setMa_khoa(maKhoa);
             }
 
-            // Nếu không có hạng mục, tự thêm 2 hạng mục mặc định
             if (chuyenKhoa.getDanh_sach_hang_muc() == null || chuyenKhoa.getDanh_sach_hang_muc().isEmpty()) {
                 List<com.phongkham.booking.entity.HangMuc> defaultHangMuc = new ArrayList<>();
                 defaultHangMuc.add(new com.phongkham.booking.entity.HangMuc("🩺", "Thăm khám & Tầm soát", "Khám lâm sàng và đánh giá tổng quát các triệu chứng ban đầu."));
@@ -113,7 +127,9 @@ public class AdminViewController {
     }
 
     @GetMapping("/chuyen-khoa/xoa/{id}")
-    public String xoaChuyenKhoa(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
+    public String xoaChuyenKhoa(@PathVariable Integer id, HttpSession session, RedirectAttributes redirectAttributes) {
+        if (!checkAdminSession(session)) return "redirect:/dang_nhap";
+
         try {
             chuyenKhoaService.xoaChuyenKhoa(id);
             redirectAttributes.addFlashAttribute("successMessage", "Xóa chuyên khoa thành công!");
@@ -125,9 +141,6 @@ public class AdminViewController {
 
     // --- QUẢN LÝ BÁC SĨ ---
 
-    /**
-     * CẬP NHẬT HỒ SƠ BÁC SĨ
-     */
     @PostMapping("/bac-si/cap-nhat")
     @Transactional
     public String capNhatHoSoBacSi(
@@ -135,13 +148,15 @@ public class AdminViewController {
             @RequestParam("chuyenKhoaId") Integer chuyenKhoaId,
             @RequestParam("hocVi") String hocVi,
             @RequestParam(value = "moTa", required = false) String moTa,
+            HttpSession session,
             RedirectAttributes redirectAttributes) {
+        if (!checkAdminSession(session)) return "redirect:/dang_nhap";
+
         try {
             Optional<BacSi> bacSiOpt = bacSiService.getBacSiById(id);
             
             if (bacSiOpt.isPresent()) {
                 BacSi bacSi = bacSiOpt.get();
-                // Sửa: Lấy ChuyenKhoa từ Optional hoặc null bằng .orElse(null)
                 ChuyenKhoa chuyenKhoa = chuyenKhoaService.getChuyenKhoaById(chuyenKhoaId).orElse(null);
                 
                 bacSi.setChuyenKhoa(chuyenKhoa);
@@ -161,11 +176,10 @@ public class AdminViewController {
         return "redirect:/admin#tab-bacsi";
     }
 
-    /**
-     * XÓA BÁC SĨ
-     */
     @GetMapping("/bac-si/xoa/{id}")
-    public String xoaBacSi(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
+    public String xoaBacSi(@PathVariable Integer id, HttpSession session, RedirectAttributes redirectAttributes) {
+        if (!checkAdminSession(session)) return "redirect:/dang_nhap";
+
         try {
             bacSiService.xoaBacSi(id);
             redirectAttributes.addFlashAttribute("successMessage", "Xóa bác sĩ thành công!");
@@ -176,7 +190,7 @@ public class AdminViewController {
     }
 
     /**
-     * CẤP TÀI KHOẢN VÀ HỒ SƠ BÁC SĨ MỚI (Lưu trực tiếp vào bảng bacsi)
+     * CẤP TÀI KHOẢN VÀ HỒ SƠ BÁC SĨ MỚI (Có mã hóa BCrypt)
      */
     @PostMapping("/cap-tai-khoan-bac-si")
     @Transactional
@@ -188,8 +202,13 @@ public class AdminViewController {
             @RequestParam(value = "email", required = false) String email,
             @RequestParam(value = "soDienThoai", required = false) String soDienThoai,
             @RequestParam(value = "chuyenKhoaId", required = false) Integer chuyenKhoaId,
+            HttpSession session,
             RedirectAttributes redirectAttributes) {
+        if (!checkAdminSession(session)) return "redirect:/dang_nhap";
+
         try {
+            BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+
             String cleanEmail = (email != null && !email.isBlank()) ? email.trim() : (tenDangNhap.trim() + "@phongkham.com");
             String cleanPhone = (soDienThoai != null && !soDienThoai.isBlank()) ? soDienThoai.trim() : null;
             String cleanHoTen = (hoTen != null && !hoTen.isBlank()) ? hoTen.trim() : "BS. " + tenDangNhap.trim();
@@ -198,14 +217,16 @@ public class AdminViewController {
             BacSi bacSi = new BacSi();
             bacSi.setHoTen(cleanHoTen);
             bacSi.setEmail(cleanEmail);
-            bacSi.setMatKhau(matKhau);
+            
+            // ĐÃ SỬA: Mã hóa BCrypt mật khẩu khi tạo mới tài khoản Bác sĩ
+            bacSi.setMatKhau(encoder.encode(matKhau));
+            
             bacSi.setSoDienThoai(cleanPhone);
             bacSi.setHocVi(cleanHocVi);
             bacSi.setVaiTro("BAC_SI");
             bacSi.setTrangThai("HOAT_DONG");
 
             if (chuyenKhoaId != null) {
-                // Sửa: Lấy ChuyenKhoa từ Optional hoặc null bằng .orElse(null)
                 ChuyenKhoa chuyenKhoa = chuyenKhoaService.getChuyenKhoaById(chuyenKhoaId).orElse(null);
                 bacSi.setChuyenKhoa(chuyenKhoa);
             }
@@ -225,7 +246,10 @@ public class AdminViewController {
     @PostMapping("/lich-kham/huy")
     public String adminHuyLichKham(@RequestParam("lichKhamId") Integer id, 
                                    @RequestParam(value = "lyDoHuy", required = false) String lyDoHuy,
+                                   HttpSession session,
                                    RedirectAttributes redirectAttributes) {
+        if (!checkAdminSession(session)) return "redirect:/dang_nhap";
+
         try {
             lichKhamService.xoaLichKham(id);
             redirectAttributes.addFlashAttribute("successMessage", "Đã xóa/hủy lịch khám thành công!");
@@ -236,7 +260,9 @@ public class AdminViewController {
     }
 
     @GetMapping("/lich-kham/xoa/{id}")
-    public String xoaLichKham(@PathVariable("id") Integer id, RedirectAttributes redirectAttributes) {
+    public String xoaLichKham(@PathVariable("id") Integer id, HttpSession session, RedirectAttributes redirectAttributes) {
+        if (!checkAdminSession(session)) return "redirect:/dang_nhap";
+
         try {
             lichKhamService.xoaLichKham(id);
             redirectAttributes.addFlashAttribute("successMessage", "Xóa lịch khám thành công!");

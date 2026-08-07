@@ -1,6 +1,7 @@
 package com.phongkham.booking.controller;
 
 import com.phongkham.booking.entity.BacSi;
+import com.phongkham.booking.entity.LichKham;
 import com.phongkham.booking.service.BacSiService;
 import com.phongkham.booking.service.LichKhamService;
 import jakarta.servlet.http.HttpSession;
@@ -9,6 +10,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.List;
 import java.util.Optional;
 
 @Controller
@@ -22,31 +24,64 @@ public class BacSiController {
         this.lichKhamService = lichKhamService;
     }
 
+    // Hàm tiện ích hỗ trợ lấy email Bác sĩ an toàn từ Session
+    private String getDoctorEmailFromSession(HttpSession session) {
+        if (session == null) return null;
+        String email = (String) session.getAttribute("doctorUser");
+        if (email == null || email.isBlank()) {
+            email = (String) session.getAttribute("userEmail");
+        }
+        return email;
+    }
+
     // 1. Dashboard chính của bác sĩ
     @GetMapping({"/bac_si", "/bacsi/dashboard", "/bac-si/dashboard"})
     public String trangDashboardBacSi(HttpSession session, Model model) {
-        // ĐÃ SỬA: Lấy "doctorUser" (đồng bộ với AdminAuthController)
-        String doctorEmail = (String) session.getAttribute("doctorUser");
+        // Lấy email Bác sĩ linh hoạt
+        String doctorEmail = getDoctorEmailFromSession(session);
+        
         if (doctorEmail == null) {
-            // ĐÃ SỬA: Chuyển hướng đúng về /dang_nhap
             return "redirect:/dang_nhap";
         }
 
         Optional<BacSi> bsOpt = bacSiService.getBacSiByEmail(doctorEmail);
         if (bsOpt.isPresent()) {
             BacSi bs = bsOpt.get();
+            
+            // Đồng bộ Session ID cho Bác sĩ
             session.setAttribute("doctorId", bs.getId());
+            session.setAttribute("bacSiId", bs.getId());
+            session.setAttribute("doctorUser", bs.getEmail());
+
             model.addAttribute("doctorId", bs.getId());
             model.addAttribute("tenBacSi", bs.getHoTen());
             model.addAttribute("departmentName", bs.getChuyenKhoa() != null ? bs.getChuyenKhoa().getTenChuyenKhoa() : "Chuyên khoa: Chưa cập nhật");
 
-            java.util.List<com.phongkham.booking.entity.LichKham> danhSachLich = lichKhamService.getLichByBacSi(bs.getId());
+            // Lấy danh sách lịch khám của Bác sĩ
+            List<LichKham> danhSachLich = lichKhamService.getLichByBacSi(bs.getId());
+            if (danhSachLich == null) {
+                danhSachLich = List.of();
+            }
+
             model.addAttribute("appointments", danhSachLich);
             model.addAttribute("dsLichKham", danhSachLich);
-            model.addAttribute("countPending", danhSachLich.stream().filter(l -> l.getTrangThai() == null || "CHO_XAC_NHAN".equalsIgnoreCase(l.getTrangThai()) || "PENDING".equalsIgnoreCase(l.getTrangThai())).count());
-            model.addAttribute("countConfirmed", danhSachLich.stream().filter(l -> "DA_XAC_NHAN".equalsIgnoreCase(l.getTrangThai()) || "CONFIRMED".equalsIgnoreCase(l.getTrangThai())).count());
-            model.addAttribute("countCompleted", danhSachLich.stream().filter(l -> "HOAN_THANH".equalsIgnoreCase(l.getTrangThai()) || "COMPLETED".equalsIgnoreCase(l.getTrangThai())).count());
-            model.addAttribute("countCancelled", danhSachLich.stream().filter(l -> "DA_HUY".equalsIgnoreCase(l.getTrangThai()) || "CANCELLED".equalsIgnoreCase(l.getTrangThai())).count());
+
+            // Thống kê trạng thái lịch
+            model.addAttribute("countPending", danhSachLich.stream()
+                    .filter(l -> l.getTrangThai() == null || "CHO_XAC_NHAN".equalsIgnoreCase(l.getTrangThai()) || "PENDING".equalsIgnoreCase(l.getTrangThai()))
+                    .count());
+            
+            model.addAttribute("countConfirmed", danhSachLich.stream()
+                    .filter(l -> "DA_XAC_NHAN".equalsIgnoreCase(l.getTrangThai()) || "CONFIRMED".equalsIgnoreCase(l.getTrangThai()))
+                    .count());
+            
+            model.addAttribute("countCompleted", danhSachLich.stream()
+                    .filter(l -> "HOAN_THANH".equalsIgnoreCase(l.getTrangThai()) || "COMPLETED".equalsIgnoreCase(l.getTrangThai()))
+                    .count());
+            
+            model.addAttribute("countCancelled", danhSachLich.stream()
+                    .filter(l -> "DA_HUY".equalsIgnoreCase(l.getTrangThai()) || "CANCELLED".equalsIgnoreCase(l.getTrangThai()))
+                    .count());
         } else {
             session.removeAttribute("doctorUser");
             return "redirect:/dang_nhap";
@@ -62,7 +97,7 @@ public class BacSiController {
                                   @RequestParam(value = "date", required = false) String date,
                                   HttpSession session, 
                                   Model model) {
-        String doctorEmail = (String) session.getAttribute("doctorUser");
+        String doctorEmail = getDoctorEmailFromSession(session);
         if (doctorEmail == null) {
             return "redirect:/dang_nhap";
         }
@@ -77,7 +112,7 @@ public class BacSiController {
     // 3. Quản lý Nhắc nhở
     @GetMapping({"/bac_si/nhac_nho", "/bac_si/nhac-nho"})
     public String trangNhacNho(HttpSession session, Model model) {
-        String doctorEmail = (String) session.getAttribute("doctorUser");
+        String doctorEmail = getDoctorEmailFromSession(session);
         if (doctorEmail == null) {
             return "redirect:/dang_nhap";
         }

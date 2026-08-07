@@ -72,7 +72,7 @@ public class WebController {
             if (session.getAttribute("adminUser") != null) {
                 return "redirect:/admin";
             }
-            if (session.getAttribute("doctorUser") != null) {
+            if (session.getAttribute("doctorUser") != null || session.getAttribute("bacSiId") != null) {
                 return "redirect:/bac_si";
             }
         }
@@ -131,15 +131,16 @@ public class WebController {
             BacSi bs = bacSiOpt.get();
             boolean isMatch = false;
             if (bs.getMatKhau() != null) {
-                // Hỗ trợ cả mật khẩu mã hóa BCrypt lẫn chuỗi thường trong CSDL
+                // Hỗ trợ cả mật khẩu mã hóa BCrypt lẫn chuỗi chưa mã hóa trong CSDL
                 isMatch = encoder.matches(matKhau, bs.getMatKhau()) || bs.getMatKhau().equals(matKhau);
             }
 
             if (isMatch) {
-                session.setAttribute("doctorUser", bs.getEmail()); // Key dùng cho BacSiController
+                // ĐỒNG BỘ: Gán đầy đủ thuộc tính Session cho BacSiController
+                session.setAttribute("doctorUser", bs.getEmail());
+                session.setAttribute("userEmail", bs.getEmail()); 
                 session.setAttribute("doctorId", bs.getId()); 
                 session.setAttribute("bacSiId", bs.getId()); 
-                session.setAttribute("userEmail", bs.getEmail());
                 session.setAttribute("userName", bs.getHoTen());
 
                 String vaiTro = bs.getVaiTro() != null ? bs.getVaiTro().toUpperCase() : "BAC_SI";
@@ -148,7 +149,7 @@ public class WebController {
                 if ("ADMIN".equals(vaiTro)) {
                     return "redirect:/admin";
                 } else {
-                    return "redirect:/bac_si"; // Chuyển hướng chuẩn về trang /bac_si
+                    return "redirect:/bac_si"; // Khớp với route @GetMapping của BacSiController
                 }
             }
         }
@@ -193,7 +194,7 @@ public class WebController {
         user.setHoTen(hoTen);
         user.setEmail(email);
         user.setSoDienThoai(soDienThoai);
-        user.setMatKhau(encoder.encode(matKhau)); // Mã hóa password bảo mật
+        user.setMatKhau(encoder.encode(matKhau)); // Mã hóa BCrypt khi đăng ký
         user.setNgayTao(LocalDateTime.now());
 
         khoNguoiDungBenhNhan.save(user);
