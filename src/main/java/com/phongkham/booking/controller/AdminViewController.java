@@ -1,248 +1,150 @@
 package com.phongkham.booking.controller;
 
-import com.phongkham.booking.entity.*;
-import com.phongkham.booking.service.*;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import com.phongkham.booking.entity.BacSi;
+import com.phongkham.booking.repository.BacSiRepository;
 
 import java.util.Optional;
-import java.util.List;
-import java.util.ArrayList;
 
 @Controller
-@RequestMapping("/admin")
-public class AdminViewController {
+public class AdminAuthController {
 
-    private final ChuyenKhoaService chuyenKhoaService;
-    private final BacSiService bacSiService;
-    private final LichKhamService lichKhamService;
+    private final BacSiRepository bacSiRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public AdminViewController(ChuyenKhoaService chuyenKhoaService, 
-                               BacSiService bacSiService, 
-                               LichKhamService lichKhamService) {
-        this.chuyenKhoaService = chuyenKhoaService;
-        this.bacSiService = bacSiService;
-        this.lichKhamService = lichKhamService;
+    public AdminAuthController(BacSiRepository bacSiRepository, PasswordEncoder passwordEncoder) {
+        this.bacSiRepository = bacSiRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
-    // 1. TRANG DASHBOARD CHÍNH CỦA ADMIN
-    @GetMapping
-    public String adminPage(Model model) {
-        model.addAttribute("dsChuyenKhoa", chuyenKhoaService.getAllChuyenKhoa());
-        model.addAttribute("dsBacSi", bacSiService.getAllBacSi());
-        model.addAttribute("dsLichKham", lichKhamService.getAllLichKham(null));
-        
-        model.addAttribute("chuyenKhoaMoi", new ChuyenKhoa());
-        model.addAttribute("bacSiMoi", new BacSi());
-        return "admin";
-    }
+    @Value("${admin1.username:admin1}")
+    private String admin1User;
+    @Value("${admin1.password:AdminPass123!}")
+    private String admin1Pass;
 
-    // --- QUẢN LÝ CHUYÊN KHOA ---
-    @PostMapping("/chuyen-khoa/them")
-    public String themChuyenKhoa(@ModelAttribute("chuyenKhoaMoi") ChuyenKhoa chuyenKhoa, RedirectAttributes redirectAttributes) {
-        try {
-            // Nếu admin chỉ nhập tên & mô tả (form ngắn), tự động sinh các trường phụ để giao diện không bị trống
-            String ten = chuyenKhoa.getTenChuyenKhoa();
-            String moTa = chuyenKhoa.getMoTa();
+    @Value("${admin2.username:admin2}")
+    private String admin2User;
+    @Value("${admin2.password:AdminPass456!}")
+    private String admin2Pass;
 
-            if (ten == null || ten.isBlank()) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Tên chuyên khoa không được để trống!");
-                return "redirect:/admin#tab-chuyenkhoa";
-            }
+    // ==========================================
+    // TRANG ĐĂNG NHẬP CHUNG CHUYỂN HƯỚNG TỰ ĐỘNG
+    // ==========================================
 
-            // Chỉ đặt các giá trị mặc định khi chưa có dữ liệu do admin nhập
-            if (chuyenKhoa.getTen_chuyen_khoa() == null || chuyenKhoa.getTen_chuyen_khoa().isBlank()) {
-                chuyenKhoa.setTen_chuyen_khoa(ten + " Chuyên Sâu");
-            }
-
-            if (chuyenKhoa.getHinhAnh() == null || chuyenKhoa.getHinhAnh().isBlank()) {
-                // Thay đường dẫn thành file thực tế trong /static
-                chuyenKhoa.setHinhAnh("/anh_bia.jpeg");
-            }
-
-            if (chuyenKhoa.getPhu_de_banner() == null || chuyenKhoa.getPhu_de_banner().isBlank()) {
-                chuyenKhoa.setPhu_de_banner("Trung tâm tiếp nhận, chẩn đoán và điều trị " + ten + " toàn diện tại Phòng khám.");
-            }
-
-            if (chuyenKhoa.getDoan_gioi_thieu() == null || chuyenKhoa.getDoan_gioi_thieu().isBlank()) {
-                chuyenKhoa.setDoan_gioi_thieu("<strong>" + ten + "</strong> chuyên tiếp nhận, chẩn đoán và điều trị toàn diện các bệnh lý. " + (moTa != null ? moTa : ""));
-            }
-
-            if (chuyenKhoa.getTieu_de_hang_muc() == null || chuyenKhoa.getTieu_de_hang_muc().isBlank()) {
-                chuyenKhoa.setTieu_de_hang_muc("Các hạng mục thăm khám và điều trị chính");
-            }
-
-            if (chuyenKhoa.getLoi_ket() == null || chuyenKhoa.getLoi_ket().isBlank()) {
-                chuyenKhoa.setLoi_ket(ten + " đóng vai trò quan trọng trong việc chăm sóc và bảo vệ sức khỏe toàn diện cho bệnh nhân.");
-            }
-
-            // Sinh mã khoa (slug) nếu chưa có
-            if (chuyenKhoa.getMaKhoa() == null || chuyenKhoa.getMaKhoa().isBlank()) {
-                String maKhoa = ten.toLowerCase()
-                        .trim()
-                        .replaceAll("[áàảãạâấầẩẫậăắằẳẵặ]", "a")
-                        .replaceAll("[đ]", "d")
-                        .replaceAll("[éèẻẽẹêếềểễệ]", "e")
-                        .replaceAll("[óòỏõọôốồổỗộơớờởỡợ]", "o")
-                        .replaceAll("[úùủũụưứừửữự]", "u")
-                        .replaceAll("[íìỉĩị]", "i")
-                        .replaceAll("[ýỳỷỹỵ]", "y")
-                        .replaceAll("[^a-z0-9]", "-")
-                        .replaceAll("-+", "-");
-                chuyenKhoa.setMa_khoa(maKhoa);
-            }
-
-            // Nếu không có hạng mục, tự thêm 2 hạng mục mặc định
-            if (chuyenKhoa.getDanh_sach_hang_muc() == null || chuyenKhoa.getDanh_sach_hang_muc().isEmpty()) {
-                List<com.phongkham.booking.entity.HangMuc> defaultHangMuc = new ArrayList<>();
-                defaultHangMuc.add(new com.phongkham.booking.entity.HangMuc("🩺", "Thăm khám & Tầm soát", "Khám lâm sàng và đánh giá tổng quát các triệu chứng ban đầu."));
-                defaultHangMuc.add(new com.phongkham.booking.entity.HangMuc("💊", "Điều trị chuyên khoa", "Đưa ra phác đồ điều trị nội khoa chuẩn y khoa và theo dõi sát sao."));
-                chuyenKhoa.setDanh_sach_hang_muc(defaultHangMuc);
-            }
-
-            chuyenKhoaService.taoChuyenKhoa(chuyenKhoa);
-            redirectAttributes.addFlashAttribute("successMessage", "Thêm chuyên khoa thành công!");
-        } catch (Exception e) {
-            e.printStackTrace();
-            redirectAttributes.addFlashAttribute("errorMessage", "Không thể thêm chuyên khoa: " + e.getMessage());
+    @GetMapping({"/login", "/dang_nhap", "/dang_nhap_nhan_vien"})
+    public String trangDangNhap(HttpSession session) {
+        if (session.getAttribute("adminUser") != null) {
+            return "redirect:/admin";
         }
-        return "redirect:/admin#tab-chuyenkhoa";
-    }
-
-    @GetMapping("/chuyen-khoa/xoa/{id}")
-    public String xoaChuyenKhoa(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
-        try {
-            chuyenKhoaService.xoaChuyenKhoa(id);
-            redirectAttributes.addFlashAttribute("successMessage", "Xóa chuyên khoa thành công!");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Chuyên khoa đang chứa bác sĩ, không thể xóa!");
+        if (session.getAttribute("doctorUser") != null) {
+            return "redirect:/bac_si";
         }
-        return "redirect:/admin#tab-chuyenkhoa";
+        return "dang_nhap";
     }
 
-    // --- QUẢN LÝ BÁC SĨ ---
+    @PostMapping({"/dang_nhap", "/dang_nhap_nhan_vien"})
+    public String xuLyDangNhapTuDong(@RequestParam("email") String email,
+                                     @RequestParam(value = "matKhau", required = false) String matKhauVN,
+                                     @RequestParam(value = "password", required = false) String matKhauEN,
+                                     HttpServletRequest request,
+                                     HttpSession session,
+                                     Model model) {
 
-    /**
-     * CẬP NHẬT HỒ SƠ BÁC SĨ
-     */
-    @PostMapping("/bac-si/cap-nhat")
-    @Transactional
-    public String capNhatHoSoBacSi(
-            @RequestParam("id") Integer id,
-            @RequestParam("chuyenKhoaId") Integer chuyenKhoaId,
-            @RequestParam("hocVi") String hocVi,
-            @RequestParam(value = "moTa", required = false) String moTa,
-            RedirectAttributes redirectAttributes) {
-        try {
-            Optional<BacSi> bacSiOpt = bacSiService.getBacSiById(id);
-            
-            if (bacSiOpt.isPresent()) {
-                BacSi bacSi = bacSiOpt.get();
-                // Sửa: Lấy ChuyenKhoa từ Optional hoặc null bằng .orElse(null)
-                ChuyenKhoa chuyenKhoa = chuyenKhoaService.getChuyenKhoaById(chuyenKhoaId).orElse(null);
-                
-                bacSi.setChuyenKhoa(chuyenKhoa);
-                bacSi.setHocVi(hocVi);
-                bacSi.setMoTa(moTa);
-                
-                bacSiService.luuBacSi(bacSi);
-                redirectAttributes.addFlashAttribute("successMessage", "Cập nhật hồ sơ bác sĩ thành công!");
-            } else {
-                redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy thông tin bác sĩ!");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi cập nhật hồ sơ bác sĩ: " + e.getMessage());
+        // Lấy mật khẩu linh hoạt từ trường "matKhau" hoặc "password"
+        String password = (matKhauVN != null && !matKhauVN.trim().isEmpty()) ? matKhauVN : matKhauEN;
+
+        if (email == null || email.trim().isEmpty() || password == null || password.trim().isEmpty()) {
+            model.addAttribute("loi", "Vui lòng điền đầy đủ email và mật khẩu!");
+            return "dang_nhap";
         }
 
-        return "redirect:/admin#tab-bacsi";
-    }
+        // --------------------------------------------------
+        // 1. NHẬN DIỆN VÀ XỬ LÝ TÀI KHOẢN ADMIN
+        // --------------------------------------------------
+        boolean isAdmin1 = admin1User.equalsIgnoreCase(email) && admin1Pass.equals(password);
+        boolean isAdmin2 = admin2User.equalsIgnoreCase(email) && admin2Pass.equals(password);
 
-    /**
-     * XÓA BÁC SĨ
-     */
-    @GetMapping("/bac-si/xoa/{id}")
-    public String xoaBacSi(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
-        try {
-            bacSiService.xoaBacSi(id);
-            redirectAttributes.addFlashAttribute("successMessage", "Xóa bác sĩ thành công!");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Không thể xóa bác sĩ này (có thể do đã có lịch khám trong hệ thống)!");
+        if (isAdmin1 || isAdmin2) {
+            if (session != null) {
+                session.invalidate();
+            }
+            HttpSession newSession = request.getSession(true);
+            newSession.setAttribute("adminUser", email);
+            newSession.setAttribute("role", "ADMIN");
+            return "redirect:/admin";
         }
-        return "redirect:/admin#tab-bacsi";
-    }
 
-    /**
-     * CẤP TÀI KHOẢN VÀ HỒ SƠ BÁC SĨ MỚI (Lưu trực tiếp vào bảng bacsi)
-     */
-    @PostMapping("/cap-tai-khoan-bac-si")
-    @Transactional
-    public String capTaiKhoanBacSi(
-            @RequestParam("tenDangNhap") String tenDangNhap,
-            @RequestParam("matKhau") String matKhau,
-            @RequestParam(value = "hoTen", required = false) String hoTen,
-            @RequestParam(value = "hocVi", required = false) String hocVi,
-            @RequestParam(value = "email", required = false) String email,
-            @RequestParam(value = "soDienThoai", required = false) String soDienThoai,
-            @RequestParam(value = "chuyenKhoaId", required = false) Integer chuyenKhoaId,
-            RedirectAttributes redirectAttributes) {
-        try {
-            String cleanEmail = (email != null && !email.isBlank()) ? email.trim() : (tenDangNhap.trim() + "@phongkham.com");
-            String cleanPhone = (soDienThoai != null && !soDienThoai.isBlank()) ? soDienThoai.trim() : null;
-            String cleanHoTen = (hoTen != null && !hoTen.isBlank()) ? hoTen.trim() : "BS. " + tenDangNhap.trim();
-            String cleanHocVi = (hocVi != null && !hocVi.isBlank()) ? hocVi.trim() : "Bác sĩ";
+        // --------------------------------------------------
+        // 2. NHẬN DIỆN VÀ XỬ LÝ TÀI KHOẢN BÁC SĨ
+        // --------------------------------------------------
+        Optional<BacSi> bsOpt = bacSiRepository.findByEmail(email);
 
-            BacSi bacSi = new BacSi();
-            bacSi.setHoTen(cleanHoTen);
-            bacSi.setEmail(cleanEmail);
-            bacSi.setMatKhau(matKhau);
-            bacSi.setSoDienThoai(cleanPhone);
-            bacSi.setHocVi(cleanHocVi);
-            bacSi.setVaiTro("BAC_SI");
-            bacSi.setTrangThai("HOAT_DONG");
+        if (bsOpt.isPresent()) {
+            BacSi bs = bsOpt.get();
+            boolean isPasswordCorrect = false;
 
-            if (chuyenKhoaId != null) {
-                // Sửa: Lấy ChuyenKhoa từ Optional hoặc null bằng .orElse(null)
-                ChuyenKhoa chuyenKhoa = chuyenKhoaService.getChuyenKhoaById(chuyenKhoaId).orElse(null);
-                bacSi.setChuyenKhoa(chuyenKhoa);
+            if (bs.getMatKhau() != null) {
+                // Kiểm tra bằng PasswordEncoder mã hóa BCrypt hoặc chuỗi chưa mã hóa
+                if (passwordEncoder.matches(password, bs.getMatKhau()) || bs.getMatKhau().equals(password)) {
+                    isPasswordCorrect = true;
+                }
             }
 
-            bacSiService.luuBacSi(bacSi);
-            redirectAttributes.addFlashAttribute("successMessage", "Cấp tài khoản Bác sĩ thành công!");
+            if (isPasswordCorrect) {
+                if (session != null) {
+                    session.invalidate();
+                }
+                HttpSession newSession = request.getSession(true);
+                newSession.setAttribute("doctorUser", bs.getEmail());
+                newSession.setAttribute("role", "DOCTOR");
+                newSession.setAttribute("doctorId", bs.getId());
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            redirectAttributes.addFlashAttribute("errorMessage", "Cấp tài khoản thất bại! Email/SĐT có thể đã tồn tại.");
+                return "redirect:/bac_si";
+            }
         }
 
-        return "redirect:/admin#tab-taikhoan";
+        // --------------------------------------------------
+        // 3. KHÔNG KHỚP ADMIN HOẶC BÁC SĨ -> BÁO LỖI
+        // --------------------------------------------------
+        model.addAttribute("loi", "Tài khoản hoặc mật khẩu không chính xác!");
+        return "dang_nhap";
     }
 
-    // --- QUẢN LÝ LỊCH KHÁM ---
-    @PostMapping("/lich-kham/huy")
-    public String adminHuyLichKham(@RequestParam("lichKhamId") Integer id, 
-                                   @RequestParam(value = "lyDoHuy", required = false) String lyDoHuy,
-                                   RedirectAttributes redirectAttributes) {
-        try {
-            lichKhamService.xoaLichKham(id);
-            redirectAttributes.addFlashAttribute("successMessage", "Đã xóa/hủy lịch khám thành công!");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Thao tác thất bại!");
+    // ==========================================
+    // CÁC ENDPOINT ĐĂNG XUẤT
+    // ==========================================
+
+    @GetMapping("/admin/logout")
+    public String logoutAdmin(HttpSession session) {
+        if (session != null) {
+            session.removeAttribute("adminUser");
+            session.removeAttribute("role");
         }
-        return "redirect:/admin#tab-lichkham";
+        return "redirect:/dang_nhap";
     }
 
-    @GetMapping("/lich-kham/xoa/{id}")
-    public String xoaLichKham(@PathVariable("id") Integer id, RedirectAttributes redirectAttributes) {
-        try {
-            lichKhamService.xoaLichKham(id);
-            redirectAttributes.addFlashAttribute("successMessage", "Xóa lịch khám thành công!");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Không thể xóa lịch khám này!");
+    @GetMapping("/bac_si/logout")
+    public String logoutBacSi(HttpSession session) {
+        if (session != null) {
+            session.removeAttribute("doctorUser");
+            session.removeAttribute("doctorId");
+            session.removeAttribute("role");
         }
-        return "redirect:/admin#tab-lichkham";
+        return "redirect:/dang_nhap";
+    }
+
+    @GetMapping("/logout")
+    public String logoutAll(HttpSession session) {
+        if (session != null) {
+            session.invalidate();
+        }
+        return "redirect:/dang_nhap";
     }
 }
