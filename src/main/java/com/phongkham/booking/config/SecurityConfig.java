@@ -10,24 +10,23 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
-public class MaNguon {
+public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            // Tắt CSRF để làm việc với API / AJAX Post dễ dàng hơn
+            // 1. Tắt CSRF để làm việc với API / AJAX Post
             .csrf(csrf -> csrf.disable())
             
-            // Nhường toàn bộ quyền kiểm tra đăng nhập cho Controller & HttpSession của bạn
+            // 2. Mở toàn bộ quyền truy cập để Controller tự quản lý Session
             .authorizeHttpRequests(auth -> auth
-                .anyRequest().permitAll()
+                .requestMatchers("/**").permitAll()
             )
             
-            // Tắt giao diện login mặc định và HTTP Basic của Spring Security
-            .formLogin(form -> form.disable())
+            // 3. Tắt HTTP Basic
             .httpBasic(basic -> basic.disable())
             
-            // Cho phép hiển thị frame/iframe nếu ứng dụng có sử dụng
+            // 4. Cho phép iFrame (nếu có dùng)
             .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()));
 
         return http.build();
