@@ -10,6 +10,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,7 +25,7 @@ public class BacSiController {
         this.lichKhamService = lichKhamService;
     }
 
-    // Hàm tiện ích hỗ trợ lấy email Bác sĩ an toàn từ Session
+    // Hàm tiện ích lấy email Bác sĩ từ Session
     private String getDoctorEmailFromSession(HttpSession session) {
         if (session == null) return null;
         String email = (String) session.getAttribute("doctorUser");
@@ -37,7 +38,6 @@ public class BacSiController {
     // 1. Dashboard chính của bác sĩ
     @GetMapping({"/bac_si", "/bacsi/dashboard", "/bac-si/dashboard"})
     public String trangDashboardBacSi(HttpSession session, Model model) {
-        // Lấy email Bác sĩ linh hoạt
         String doctorEmail = getDoctorEmailFromSession(session);
         
         if (doctorEmail == null) {
@@ -57,29 +57,37 @@ public class BacSiController {
             model.addAttribute("tenBacSi", bs.getHoTen());
             model.addAttribute("departmentName", bs.getChuyenKhoa() != null ? bs.getChuyenKhoa().getTenChuyenKhoa() : "Chuyên khoa: Chưa cập nhật");
 
-            // Lấy danh sách lịch khám của Bác sĩ
-            List<LichKham> danhSachLich = lichKhamService.getLichByBacSi(bs.getId());
-            if (danhSachLich == null) {
-                danhSachLich = List.of();
+            // Xử lý lấy lịch khám an toàn bằng try-catch
+            List<LichKham> danhSachLich = new ArrayList<>();
+            try {
+                if (bs.getId() != null) {
+                    List<LichKham> list = lichKhamService.getLichByBacSi(bs.getId().intValue());
+                    if (list != null) {
+                        danhSachLich = list;
+                    }
+                }
+            } catch (Exception e) {
+                System.err.println("Lỗi khi truy vấn lịch khám bác sĩ: " + e.getMessage());
             }
 
             model.addAttribute("appointments", danhSachLich);
             model.addAttribute("dsLichKham", danhSachLich);
 
-            // Thống kê trạng thái lịch
-            model.addAttribute("countPending", danhSachLich.stream()
+            // Thống kê trạng thái lịch khám
+            final List<LichKham> finalLich = danhSachLich;
+            model.addAttribute("countPending", finalLich.stream()
                     .filter(l -> l.getTrangThai() == null || "CHO_XAC_NHAN".equalsIgnoreCase(l.getTrangThai()) || "PENDING".equalsIgnoreCase(l.getTrangThai()))
                     .count());
             
-            model.addAttribute("countConfirmed", danhSachLich.stream()
+            model.addAttribute("countConfirmed", finalLich.stream()
                     .filter(l -> "DA_XAC_NHAN".equalsIgnoreCase(l.getTrangThai()) || "CONFIRMED".equalsIgnoreCase(l.getTrangThai()))
                     .count());
             
-            model.addAttribute("countCompleted", danhSachLich.stream()
+            model.addAttribute("countCompleted", finalLich.stream()
                     .filter(l -> "HOAN_THANH".equalsIgnoreCase(l.getTrangThai()) || "COMPLETED".equalsIgnoreCase(l.getTrangThai()))
                     .count());
             
-            model.addAttribute("countCancelled", danhSachLich.stream()
+            model.addAttribute("countCancelled", finalLich.stream()
                     .filter(l -> "DA_HUY".equalsIgnoreCase(l.getTrangThai()) || "CANCELLED".equalsIgnoreCase(l.getTrangThai()))
                     .count());
         } else {
