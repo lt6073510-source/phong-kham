@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "bacsi")
@@ -40,6 +41,11 @@ public class BacSi {
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "danhSachBacSi"})
     private ChuyenKhoa chuyenKhoa;
 
+    // PHÒNG NGỪA VÒNG LẶP: Nếu entity có quan hệ OneToMany tới LichKham, bắt buộc phải @JsonIgnore
+    @OneToMany(mappedBy = "bacSi", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<LichKham> dsLichKham;
+
     @Column(name = "hoc_vi", length = 100)
     private String hocVi;
 
@@ -60,7 +66,6 @@ public class BacSi {
 
     public BacSi() {}
 
-    // Constructor phục vụ cho khởi tạo nhanh
     public BacSi(String hoTen, String email, String matKhau, String soDienThoai, String hocVi, ChuyenKhoa chuyenKhoa, String moTa) {
         this.hoTen = hoTen;
         this.email = email;
@@ -95,6 +100,9 @@ public class BacSi {
 
     public ChuyenKhoa getChuyenKhoa() { return chuyenKhoa; }
     public void setChuyenKhoa(ChuyenKhoa chuyenKhoa) { this.chuyenKhoa = chuyenKhoa; }
+
+    public List<LichKham> getDsLichKham() { return dsLichKham; }
+    public void setDsLichKham(List<LichKham> dsLichKham) { this.dsLichKham = dsLichKham; }
 
     public String getHocVi() { return hocVi; }
     public void setHocVi(String hocVi) { this.hocVi = hocVi; }

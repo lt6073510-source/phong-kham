@@ -1,124 +1,182 @@
 package com.phongkham.booking.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import java.math.BigDecimal;
+import java.time.LocalTime;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
-@Table(name = "bacsi")
-public class BacSi {
+@Table(name = "lichkham")
+public class LichKham {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    // === Thông tin Tài khoản & Đăng nhập ===
-    @Column(name = "ho_ten", nullable = false, length = 100)
-    private String hoTen;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "benh_nhan_id")
+    @JsonIgnoreProperties({"matKhau", "lichKhams", "dsLichKham"})
+    private NguoiDungBenhNhan benhNhan;
 
-    @Column(name = "email", nullable = false, unique = true, length = 100)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "bac_si_id")
+    @JsonIgnoreProperties({"matKhau", "lichKhams", "dsLichKham"})
+    private BacSi bacSi;
+
+    private Integer lichLamViecId;
+    private String ngayKham;
+    private String gioKham;
+    private String trangThai; 
+
+    @Column(columnDefinition = "TEXT")
+    private String ghiChu;
+
+    private LocalDateTime ngayDat;
+    private String chanDoan;
+    private String donThuoc;
+
+    @Column(columnDefinition = "TEXT")
+    private String ghiChuBacSi;
+
+    private LocalTime gioBatDau;
+    private LocalTime gioKetThuc;
+    private String lyDoHuy;
+    private String tenBacSi;
+    private String tenBenhNhan;
+
+    @Column(columnDefinition = "TEXT")
+    private String tienSuBenh;
+
+    private String trieuChung;
+    private Long chuyenKhoaId;
     private String email;
-
-    @JsonIgnore // Không trả về mật khẩu khi serialize JSON ra Client
-    @Column(name = "mat_khau", nullable = false)
-    private String matKhau;
-
-    @Column(name = "so_dien_thoai", length = 15)
+    private String hoTenBenhNhan;
+    private String lyDoDoi;
+    private String ngayTaiKham;
+    private LocalDateTime ngayTao;
+    private Long nguoiDungId;
     private String soDienThoai;
 
-    @Column(name = "vai_tro", length = 20)
-    private String vaiTro = "BAC_SI";
-
-    @Column(name = "trang_thai", length = 20)
-    private String trangThai = "HOAT_DONG";
-
-    // === Thông tin Hồ sơ Chuyên môn ===
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "chuyen_khoa_id", nullable = false)
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "danhSachBacSi"})
-    private ChuyenKhoa chuyenKhoa;
-
-    // PHÒNG NGỪA VÒNG LẶP: Nếu entity có quan hệ OneToMany tới LichKham, bắt buộc phải @JsonIgnore
-    @OneToMany(mappedBy = "bacSi", fetch = FetchType.LAZY)
-    @JsonIgnore
-    private List<LichKham> dsLichKham;
-
-    @Column(name = "hoc_vi", length = 100)
-    private String hocVi;
-
-    @Column(name = "so_nam_kinh_nghiem")
-    private Integer soNamKinhNghiem = 0;
-
-    @Column(name = "gia_kham")
-    private BigDecimal giaKham = new BigDecimal("200000.00");
-
-    @Column(name = "anh")
-    private String anh;
-
-    @Column(name = "mo_ta", columnDefinition = "TEXT")
-    private String moTa;
-
-    @Column(name = "ngay_tao", insertable = false, updatable = false)
-    private LocalDateTime ngayTao;
-
-    public BacSi() {}
-
-    public BacSi(String hoTen, String email, String matKhau, String soDienThoai, String hocVi, ChuyenKhoa chuyenKhoa, String moTa) {
-        this.hoTen = hoTen;
-        this.email = email;
-        this.matKhau = matKhau;
-        this.soDienThoai = soDienThoai;
-        this.hocVi = hocVi;
-        this.chuyenKhoa = chuyenKhoa;
-        this.moTa = moTa;
+    public LichKham() {
     }
 
-    // --- Getter & Setter ---
+    // --- Helper methods ---
+    public NguoiDungBenhNhan getBenhNhan() {
+        return benhNhan;
+    }
+
+    public void setBenhNhan(NguoiDungBenhNhan benhNhan) {
+        this.benhNhan = benhNhan;
+    }
+
+    public Long getBenhNhanId() {
+        if (benhNhan != null) {
+            return benhNhan.getId();
+        }
+        return null;
+    }
+
+    public void setBenhNhanId(Long benhNhanId) {
+        if (benhNhanId != null) {
+            if (this.benhNhan == null) {
+                this.benhNhan = new NguoiDungBenhNhan();
+            }
+            this.benhNhan.setId(benhNhanId);
+        }
+    }
+
+    public Long getBacSiId() {
+        if (bacSi == null || bacSi.getId() == null) {
+            return null;
+        }
+        return Long.valueOf(bacSi.getId().toString());
+    }
+
+    public void setBacSiId(Long bacSiId) {
+        if (bacSiId != null) {
+            if (this.bacSi == null) {
+                this.bacSi = new BacSi();
+            }
+            this.bacSi.setId(bacSiId.intValue());
+        }
+    }
+
+    // --- Getters and Setters ---
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
 
-    public String getHoTen() { return hoTen; }
-    public void setHoTen(String hoTen) { this.hoTen = hoTen; }
+    public BacSi getBacSi() { return bacSi; }
+    public void setBacSi(BacSi bacSi) { this.bacSi = bacSi; }
 
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
+    public Integer getLichLamViecId() { return lichLamViecId; }
+    public void setLichLamViecId(Integer lichLamViecId) { this.lichLamViecId = lichLamViecId; }
 
-    public String getMatKhau() { return matKhau; }
-    public void setMatKhau(String matKhau) { this.matKhau = matKhau; }
+    public String getNgayKham() { return ngayKham; }
+    public void setNgayKham(String ngayKham) { this.ngayKham = ngayKham; }
 
-    public String getSoDienThoai() { return soDienThoai; }
-    public void setSoDienThoai(String soDienThoai) { this.soDienThoai = soDienThoai; }
-
-    public String getVaiTro() { return vaiTro; }
-    public void setVaiTro(String vaiTro) { this.vaiTro = vaiTro; }
+    public String getGioKham() { return gioKham; }
+    public void setGioKham(String gioKham) { this.gioKham = gioKham; }
 
     public String getTrangThai() { return trangThai; }
     public void setTrangThai(String trangThai) { this.trangThai = trangThai; }
 
-    public ChuyenKhoa getChuyenKhoa() { return chuyenKhoa; }
-    public void setChuyenKhoa(ChuyenKhoa chuyenKhoa) { this.chuyenKhoa = chuyenKhoa; }
+    public String getGhiChu() { return ghiChu; }
+    public void setGhiChu(String ghiChu) { this.ghiChu = ghiChu; }
 
-    public List<LichKham> getDsLichKham() { return dsLichKham; }
-    public void setDsLichKham(List<LichKham> dsLichKham) { this.dsLichKham = dsLichKham; }
+    public LocalDateTime getNgayDat() { return ngayDat; }
+    public void setNgayDat(LocalDateTime ngayDat) { this.ngayDat = ngayDat; }
 
-    public String getHocVi() { return hocVi; }
-    public void setHocVi(String hocVi) { this.hocVi = hocVi; }
+    public String getChanDoan() { return chanDoan; }
+    public void setChanDoan(String chanDoan) { this.chanDoan = chanDoan; }
 
-    public Integer getSoNamKinhNghiem() { return soNamKinhNghiem; }
-    public void setSoNamKinhNghiem(Integer soNamKinhNghiem) { this.soNamKinhNghiem = soNamKinhNghiem; }
+    public String getDonThuoc() { return donThuoc; }
+    public void setDonThuoc(String donThuoc) { this.donThuoc = donThuoc; }
 
-    public BigDecimal getGiaKham() { return giaKham; }
-    public void setGiaKham(BigDecimal giaKham) { this.giaKham = giaKham; }
+    public String getGhiChuBacSi() { return ghiChuBacSi; }
+    public void setGhiChuBacSi(String ghiChuBacSi) { this.ghiChuBacSi = ghiChuBacSi; }
 
-    public String getAnh() { return anh; }
-    public void setAnh(String anh) { this.anh = anh; }
+    public LocalTime getGioBatDau() { return gioBatDau; }
+    public void setGioBatDau(LocalTime gioBatDau) { this.gioBatDau = gioBatDau; }
 
-    public String getMoTa() { return moTa; }
-    public void setMoTa(String moTa) { this.moTa = moTa; }
+    public LocalTime getGioKetThuc() { return gioKetThuc; }
+    public void setGioKetThuc(LocalTime gioKetThuc) { this.gioKetThuc = gioKetThuc; }
+
+    public String getLyDoHuy() { return lyDoHuy; }
+    public void setLyDoHuy(String lyDoHuy) { this.lyDoHuy = lyDoHuy; }
+
+    public String getTenBacSi() { return tenBacSi; }
+    public void setTenBacSi(String tenBacSi) { this.tenBacSi = tenBacSi; }
+
+    public String getTenBenhNhan() { return tenBenhNhan; }
+    public void setTenBenhNhan(String tenBenhNhan) { this.tenBenhNhan = tenBenhNhan; }
+
+    public String getTienSuBenh() { return tienSuBenh; }
+    public void setTienSuBenh(String tienSuBenh) { this.tienSuBenh = tienSuBenh; }
+
+    public String getTrieuChung() { return trieuChung; }
+    public void setTrieuChung(String trieuChung) { this.trieuChung = trieuChung; }
+
+    public Long getChuyenKhoaId() { return chuyenKhoaId; }
+    public void setChuyenKhoaId(Long chuyenKhoaId) { this.chuyenKhoaId = chuyenKhoaId; }
+
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+
+    public String getHoTenBenhNhan() { return hoTenBenhNhan; }
+    public void setHoTenBenhNhan(String hoTenBenhNhan) { this.hoTenBenhNhan = hoTenBenhNhan; }
+
+    public String getLyDoDoi() { return lyDoDoi; }
+    public void setLyDoDoi(String lyDoDoi) { this.lyDoDoi = lyDoDoi; }
+
+    public String getNgayTaiKham() { return ngayTaiKham; }
+    public void setNgayTaiKham(String ngayTaiKham) { this.ngayTaiKham = ngayTaiKham; }
 
     public LocalDateTime getNgayTao() { return ngayTao; }
     public void setNgayTao(LocalDateTime ngayTao) { this.ngayTao = ngayTao; }
+
+    public Long getNguoiDungId() { return nguoiDungId; }
+    public void setNguoiDungId(Long nguoiDungId) { this.nguoiDungId = nguoiDungId; }
+
+    public String getSoDienThoai() { return soDienThoai; }
+    public void setSoDienThoai(String soDienThoai) { this.soDienThoai = soDienThoai; }
 }
