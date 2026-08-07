@@ -38,7 +38,14 @@ public class BacSiController {
             model.addAttribute("doctorId", bs.getId());
             model.addAttribute("tenBacSi", bs.getHoTen());
             model.addAttribute("departmentName", bs.getChuyenKhoa() != null ? bs.getChuyenKhoa().getTenChuyenKhoa() : "Chuyên khoa: Chưa cập nhật");
-            model.addAttribute("dsLichKham", lichKhamService.getAllLichKham(bs.getId().toString()));
+
+            java.util.List<com.phongkham.booking.entity.LichKham> danhSachLich = lichKhamService.getLichByBacSi(bs.getId());
+            model.addAttribute("appointments", danhSachLich);
+            model.addAttribute("dsLichKham", danhSachLich);
+            model.addAttribute("countPending", danhSachLich.stream().filter(l -> l.getTrangThai() == null || "CHO_XAC_NHAN".equalsIgnoreCase(l.getTrangThai()) || "PENDING".equalsIgnoreCase(l.getTrangThai())).count());
+            model.addAttribute("countConfirmed", danhSachLich.stream().filter(l -> "DA_XAC_NHAN".equalsIgnoreCase(l.getTrangThai()) || "CONFIRMED".equalsIgnoreCase(l.getTrangThai())).count());
+            model.addAttribute("countCompleted", danhSachLich.stream().filter(l -> "HOAN_THANH".equalsIgnoreCase(l.getTrangThai()) || "COMPLETED".equalsIgnoreCase(l.getTrangThai())).count());
+            model.addAttribute("countCancelled", danhSachLich.stream().filter(l -> "DA_HUY".equalsIgnoreCase(l.getTrangThai()) || "CANCELLED".equalsIgnoreCase(l.getTrangThai())).count());
         } else {
             session.removeAttribute("userEmail"); // SỬA: Key session
             return "redirect:/dang-nhap"; // SỬA: Chuyển hướng

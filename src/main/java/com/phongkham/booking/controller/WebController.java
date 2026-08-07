@@ -21,6 +21,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.Map;
@@ -356,15 +358,37 @@ model.addAttribute("errorMessage", true);
 @GetMapping({"/lich-su-kham", "/lich_su_kham", "/lich_su_dang_ky", "/lich-su-dang-ky"})
 public String xemLichSuKham(HttpSession session, Model model) {
  String userEmail = (String) session.getAttribute("userEmail");
-Object roleObj = session.getAttribute("userRole");
+ Object roleObj = session.getAttribute("userRole");
 
- if (userEmail == null || (roleObj != null && !"BENH_NHAN".equalsIgnoreCase(roleObj.toString()))) {
+ if ((userEmail == null || userEmail.isBlank()) && (roleObj != null && !"BENH_NHAN".equalsIgnoreCase(roleObj.toString()))) {
  return "redirect:/dang-nhap";
  }
 
-    List<LichKham> dsLichKham = lichKhamService.getLichByEmail(userEmail);
-    model.addAttribute("dsLichKham", dsLichKham);
-    model.addAttribute("danhSachLich", dsLichKham);
+    List<LichKham> dsLichKham = new ArrayList<>();
+    if (userEmail != null && !userEmail.isBlank()) {
+        dsLichKham.addAll(lichKhamService.getLichByEmail(userEmail));
+    }
+
+    Object userIdObj = session.getAttribute("userId");
+    if (userIdObj != null) {
+        try {
+            Integer userId = Integer.valueOf(userIdObj.toString());
+            dsLichKham.addAll(lichKhamService.getLichByBenhNhanId(userId));
+        } catch (NumberFormatException ignored) {
+            // bỏ qua nếu session userId không hợp lệ
+        }
+    }
+
+    Map<Integer, LichKham> uniqueAppointments = new LinkedHashMap<>();
+    for (LichKham lich : dsLichKham) {
+        if (lich != null && lich.getId() != null) {
+            uniqueAppointments.putIfAbsent(lich.getId(), lich);
+        }
+    }
+
+    List<LichKham> danhSachLich = new ArrayList<>(uniqueAppointments.values());
+    model.addAttribute("dsLichKham", danhSachLich);
+    model.addAttribute("danhSachLich", danhSachLich);
     model.addAttribute("userEmail", userEmail);
 
     // Template file in resources is named `lich_su_dang_ky.html` — return that view name
