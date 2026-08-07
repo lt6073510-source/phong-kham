@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/bac-si")
+@RequestMapping("/api/bac_si")
 public class BacSiApiController {
 
     private final BacSiRepository bacSiRepository;
