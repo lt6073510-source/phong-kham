@@ -72,7 +72,7 @@ public class WebController {
             if (session.getAttribute("adminUser") != null) {
                 return "redirect:/admin";
             }
-            if (session.getAttribute("doctorUser") != null || session.getAttribute("bacSiId") != null) {
+            if (session.getAttribute("doctorUser") != null) {
                 return "redirect:/bac_si";
             }
         }
@@ -94,7 +94,7 @@ public class WebController {
             return "redirect:/dang_nhap";
         }
 
-        // --- A. CHECK ADMIN (ENV VARS HOẶC CẤU HÌNH CỐ ĐỊNH) ---
+        // --- A. XỬ LÝ DÀNH CHO ADMIN ---
         String admin1Email = System.getenv("APP_ADMIN1_EMAIL");
         String admin1Hash  = System.getenv("APP_ADMIN1_PASS_HASH");
         String admin2Email = System.getenv("APP_ADMIN2_EMAIL");
@@ -107,41 +107,41 @@ public class WebController {
             admin2Hash  = encoder.encode("AdminPass456!");
         }
 
-        // Kiểm tra Admin 1
         if (admin1Email != null && admin1Email.equalsIgnoreCase(email) && encoder.matches(matKhau, admin1Hash)) {
+            session.invalidate(); // Làm sạch session cũ
             session.setAttribute("adminUser", admin1Email);
-            session.setAttribute("userEmail", admin1Email);
-            session.setAttribute("userName", "Administrator");
             session.setAttribute("userRole", "ADMIN");
             return "redirect:/admin";
         }
 
-        // Kiểm tra Admin 2
         if (admin2Email != null && admin2Email.equalsIgnoreCase(email) && encoder.matches(matKhau, admin2Hash)) {
+            session.invalidate(); // Làm sạch session cũ
             session.setAttribute("adminUser", admin2Email);
-            session.setAttribute("userEmail", admin2Email);
-            session.setAttribute("userName", "Administrator");
             session.setAttribute("userRole", "ADMIN");
             return "redirect:/admin";
         }
 
-        // --- B. CHECK BÁC SĨ ---
+        // --- B. XỬ LÝ DÀNH CHO BÁC SĨ (ƯU TIÊN CHECK BẢNG BACSI THỨ 2) ---
         Optional<BacSi> bacSiOpt = khoBacSi.findByEmail(email);
         if (bacSiOpt.isPresent()) {
             BacSi bs = bacSiOpt.get();
             boolean isMatch = false;
             if (bs.getMatKhau() != null) {
-                // Hỗ trợ cả mật khẩu mã hóa BCrypt lẫn chuỗi chưa mã hóa trong CSDL
                 isMatch = encoder.matches(matKhau, bs.getMatKhau()) || bs.getMatKhau().equals(matKhau);
             }
 
             if (isMatch) {
-                // ĐỒNG BỘ: Gán đầy đủ thuộc tính Session cho BacSiController
+                // ĐÃ SỬA: Xóa bỏ hoàn toàn các Session key của Bệnh nhân
+                session.removeAttribute("userLuuSinh");
+                session.removeAttribute("userId");
+                session.removeAttribute("userName");
+                session.removeAttribute("userEmail");
+
+                // ĐÃ SỬA: Lưu chuẩn Session Bác sĩ (KHÔNG lưu userEmail)
                 session.setAttribute("doctorUser", bs.getEmail());
-                session.setAttribute("userEmail", bs.getEmail()); 
                 session.setAttribute("doctorId", bs.getId()); 
                 session.setAttribute("bacSiId", bs.getId()); 
-                session.setAttribute("userName", bs.getHoTen());
+                session.setAttribute("doctorName", bs.getHoTen());
 
                 String vaiTro = bs.getVaiTro() != null ? bs.getVaiTro().toUpperCase() : "BAC_SI";
                 session.setAttribute("userRole", vaiTro);
@@ -149,16 +149,21 @@ public class WebController {
                 if ("ADMIN".equals(vaiTro)) {
                     return "redirect:/admin";
                 } else {
-                    return "redirect:/bac_si"; // Khớp với route @GetMapping của BacSiController
+                    return "redirect:/bac_si"; // Bác sĩ chuyển hướng thẳng sang /bac_si
                 }
             }
         }
 
-        // --- C. CHECK BỆNH NHÂN ---
+        // --- C. XỬ LÝ DÀNH CHO BỆNH NHÂN (CUỐI CÙNG) ---
         Optional<NguoiDungBenhNhan> userOpt = khoNguoiDungBenhNhan.findByEmail(email);
         if (userOpt.isPresent()) {
             NguoiDungBenhNhan user = userOpt.get();
             if (encoder.matches(matKhau, user.getMatKhau()) || user.getMatKhau().equals(matKhau)) {
+                // Xóa các key Bác sĩ nếu có
+                session.removeAttribute("doctorUser");
+                session.removeAttribute("doctorId");
+                session.removeAttribute("bacSiId");
+
                 session.setAttribute("userLuuSinh", user);
                 session.setAttribute("userId", user.getId());
                 session.setAttribute("userEmail", user.getEmail());
@@ -194,7 +199,7 @@ public class WebController {
         user.setHoTen(hoTen);
         user.setEmail(email);
         user.setSoDienThoai(soDienThoai);
-        user.setMatKhau(encoder.encode(matKhau)); // Mã hóa BCrypt khi đăng ký
+        user.setMatKhau(encoder.encode(matKhau));
         user.setNgayTao(LocalDateTime.now());
 
         khoNguoiDungBenhNhan.save(user);
@@ -217,8 +222,7 @@ public class WebController {
     @GetMapping("/admin/logout")
     public String logoutAdmin(HttpSession session) {
         if (session != null) {
-            session.removeAttribute("adminUser");
-            session.removeAttribute("userRole");
+            session.invalidate();
         }
         return "redirect:/dang_nhap";
     }
@@ -226,10 +230,7 @@ public class WebController {
     @GetMapping("/bac_si/logout")
     public String logoutBacSi(HttpSession session) {
         if (session != null) {
-            session.removeAttribute("doctorUser");
-            session.removeAttribute("doctorId");
-            session.removeAttribute("bacSiId");
-            session.removeAttribute("userRole");
+            session.invalidate();
         }
         return "redirect:/dang_nhap";
     }
