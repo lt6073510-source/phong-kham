@@ -746,47 +746,54 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
 <!-- SCRIPT BẮT BUỘC ĐỂ GIỮ TAB KHI SUBMIT FORM/RELOAD -->
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    // 1. Kiểm tra Hashtag trên URL trước, nếu không có mới lấy trong localStorage
-    let activeHash = window.location.hash || localStorage.getItem("activeAdminTab");
-
-    if (activeHash && activeHash !== "#") {
-        // Tìm button/link ở Sidebar tương ứng với Hash (VD: #chuyen-khoa)
-        let tabTrigger = document.querySelector(`[data-bs-target="${activeHash}"], [href="${activeHash}"]`);
-        
-        if (tabTrigger) {
-            // Tắt active của tất cả các Tab hiện tại
-            document.querySelectorAll('.nav-link, .tab-pane').forEach(el => {
-                el.classList.remove('active', 'show');
-            });
-
-            // Mở tab được lưu
-            let tabInstance = new bootstrap.Tab(tabTrigger);
-            tabInstance.show();
-
-            // Hiển thị nội dung Tab
-            let targetContent = document.querySelector(activeHash);
-            if (targetContent) {
-                targetContent.classList.add('active', 'show');
-            }
-        }
+    if (typeof bootstrap === 'undefined') {
+        return;
     }
 
-    // 2. Lưu trạng thái mỗi khi người dùng click chuyển tab thủ công
-    let tabElements = document.querySelectorAll('[data-bs-toggle="tab"], [data-bs-toggle="pill"]');
-    tabElements.forEach(function (tabEl) {
-        tabEl.addEventListener('click', function (e) {
-            let target = this.getAttribute('data-bs-target') || this.getAttribute('href');
+    const sidebarButtons = document.querySelectorAll('#v-pills-tab .nav-link');
+    const tabPanes = document.querySelectorAll('.tab-content > .tab-pane');
+
+    function activateTab(targetSelector) {
+        if (!targetSelector || !targetSelector.startsWith('#')) {
+            return;
+        }
+
+        const button = document.querySelector(`#v-pills-tab .nav-link[data-bs-target="${targetSelector}"]`);
+        if (!button) {
+            return;
+        }
+
+        tabPanes.forEach(pane => pane.classList.remove('active', 'show'));
+        sidebarButtons.forEach(btn => btn.classList.remove('active'));
+
+        button.classList.add('active');
+        const targetPane = document.querySelector(targetSelector);
+        if (targetPane) {
+            targetPane.classList.add('active', 'show');
+        }
+
+        const tab = new bootstrap.Tab(button);
+        tab.show();
+    }
+
+    const savedHash = window.location.hash || localStorage.getItem('activeAdminTab') || '#tab-home';
+    activateTab(savedHash);
+
+    sidebarButtons.forEach(function (button) {
+        button.addEventListener('click', function () {
+            const target = this.getAttribute('data-bs-target') || this.getAttribute('href');
             if (target && target.startsWith('#')) {
-                localStorage.setItem("activeAdminTab", target);
-                history.replaceState(null, null, target);
+                localStorage.setItem('activeAdminTab', target);
+                history.replaceState(null, '', target);
             }
         });
     });
 });
 </script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
