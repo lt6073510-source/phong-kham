@@ -25,10 +25,11 @@ public class BacSiController {
     // 1. Dashboard chính của bác sĩ
     @GetMapping({"/bac_si", "/bacsi/dashboard", "/bac-si/dashboard"})
     public String trangDashboardBacSi(HttpSession session, Model model) {
-        // SỬA: Đổi "doctorUser" -> "userEmail" cho khớp với WebController
-        String doctorEmail = (String) session.getAttribute("userEmail");
+        // ĐÃ SỬA: Lấy "doctorUser" (đồng bộ với AdminAuthController)
+        String doctorEmail = (String) session.getAttribute("doctorUser");
         if (doctorEmail == null) {
-            return "redirect:/dang-nhap"; // SỬA: Đổi sang trang đăng nhập chung
+            // ĐÃ SỬA: Chuyển hướng đúng về /dang_nhap
+            return "redirect:/dang_nhap";
         }
 
         Optional<BacSi> bsOpt = bacSiService.getBacSiByEmail(doctorEmail);
@@ -47,8 +48,8 @@ public class BacSiController {
             model.addAttribute("countCompleted", danhSachLich.stream().filter(l -> "HOAN_THANH".equalsIgnoreCase(l.getTrangThai()) || "COMPLETED".equalsIgnoreCase(l.getTrangThai())).count());
             model.addAttribute("countCancelled", danhSachLich.stream().filter(l -> "DA_HUY".equalsIgnoreCase(l.getTrangThai()) || "CANCELLED".equalsIgnoreCase(l.getTrangThai())).count());
         } else {
-            session.removeAttribute("userEmail"); // SỬA: Key session
-            return "redirect:/dang-nhap"; // SỬA: Chuyển hướng
+            session.removeAttribute("doctorUser");
+            return "redirect:/dang_nhap";
         }
 
         return "bac_si";
@@ -61,30 +62,26 @@ public class BacSiController {
                                   @RequestParam(value = "date", required = false) String date,
                                   HttpSession session, 
                                   Model model) {
-        // SỬA: Đổi "doctorUser" -> "userEmail"
-        String doctorEmail = (String) session.getAttribute("userEmail");
+        String doctorEmail = (String) session.getAttribute("doctorUser");
         if (doctorEmail == null) {
-            return "redirect:/dang-nhap"; // SỬA
+            return "redirect:/dang_nhap";
         }
 
         model.addAttribute("keyword", keyword);
         model.addAttribute("selectedDate", date);
         model.addAttribute("selectedPatientId", patientId);
 
-        // ĐÃ SỬA: Bỏ tiền tố "bac_si/" để Thymeleaf tìm đúng file templates/chi_tiet_ho_so.html
         return "chi_tiet_ho_so"; 
     }
 
     // 3. Quản lý Nhắc nhở
     @GetMapping({"/bac_si/nhac_nho", "/bac_si/nhac-nho"})
     public String trangNhacNho(HttpSession session, Model model) {
-        // SỬA: Đổi "doctorUser" -> "userEmail"
-        String doctorEmail = (String) session.getAttribute("userEmail");
+        String doctorEmail = (String) session.getAttribute("doctorUser");
         if (doctorEmail == null) {
-            return "redirect:/dang-nhap"; // SỬA
+            return "redirect:/dang_nhap";
         }
 
-        // ĐÃ SỬA: Bỏ tiền tố "bac_si/" để Thymeleaf tìm đúng file templates/nhac_nho.html
         return "nhac_nho"; 
     }
 }
