@@ -25,7 +25,7 @@ public class BacSiController {
         this.lichKhamService = lichKhamService;
     }
 
-    // Hàm tiện ích lấy email Bác sĩ từ Session
+    // Hàm tiện ích lấy email Bác sĩ an toàn từ Session
     private String getDoctorEmailFromSession(HttpSession session) {
         if (session == null) return null;
         String email = (String) session.getAttribute("doctorUser");
@@ -40,6 +40,14 @@ public class BacSiController {
     public String trangDashboardBacSi(HttpSession session, Model model) {
         String doctorEmail = getDoctorEmailFromSession(session);
         
+        // Nếu không có email trong session, kiểm tra tiếp xem có lưu trực tiếp object Bác sĩ hay ID không
+        if (doctorEmail == null) {
+            Object bsObj = session.getAttribute("userLuuSinh");
+            if (bsObj instanceof BacSi) {
+                doctorEmail = ((BacSi) bsObj).getEmail();
+            }
+        }
+
         if (doctorEmail == null) {
             return "redirect:/dang_nhap";
         }
@@ -52,6 +60,7 @@ public class BacSiController {
             session.setAttribute("doctorId", bs.getId());
             session.setAttribute("bacSiId", bs.getId());
             session.setAttribute("doctorUser", bs.getEmail());
+            session.setAttribute("userEmail", bs.getEmail());
 
             model.addAttribute("doctorId", bs.getId());
             model.addAttribute("tenBacSi", bs.getHoTen());
@@ -73,22 +82,22 @@ public class BacSiController {
             model.addAttribute("appointments", danhSachLich);
             model.addAttribute("dsLichKham", danhSachLich);
 
-            // Thống kê trạng thái lịch khám
+            // Thống kê trạng thái lịch khám (Đã bọc kiểm tra null an toàn tuyệt đối)
             final List<LichKham> finalLich = danhSachLich;
             model.addAttribute("countPending", finalLich.stream()
-                    .filter(l -> l.getTrangThai() == null || "CHO_XAC_NHAN".equalsIgnoreCase(l.getTrangThai()) || "PENDING".equalsIgnoreCase(l.getTrangThai()))
+                    .filter(l -> l != null && (l.getTrangThai() == null || "CHO_XAC_NHAN".equalsIgnoreCase(l.getTrangThai()) || "PENDING".equalsIgnoreCase(l.getTrangThai())))
                     .count());
             
             model.addAttribute("countConfirmed", finalLich.stream()
-                    .filter(l -> "DA_XAC_NHAN".equalsIgnoreCase(l.getTrangThai()) || "CONFIRMED".equalsIgnoreCase(l.getTrangThai()))
+                    .filter(l -> l != null && l.getTrangThai() != null && ("DA_XAC_NHAN".equalsIgnoreCase(l.getTrangThai()) || "CONFIRMED".equalsIgnoreCase(l.getTrangThai())))
                     .count());
             
             model.addAttribute("countCompleted", finalLich.stream()
-                    .filter(l -> "HOAN_THANH".equalsIgnoreCase(l.getTrangThai()) || "COMPLETED".equalsIgnoreCase(l.getTrangThai()))
+                    .filter(l -> l != null && l.getTrangThai() != null && ("HOAN_THANH".equalsIgnoreCase(l.getTrangThai()) || "COMPLETED".equalsIgnoreCase(l.getTrangThai())))
                     .count());
             
             model.addAttribute("countCancelled", finalLich.stream()
-                    .filter(l -> "DA_HUY".equalsIgnoreCase(l.getTrangThai()) || "CANCELLED".equalsIgnoreCase(l.getTrangThai()))
+                    .filter(l -> l != null && l.getTrangThai() != null && ("DA_HUY".equalsIgnoreCase(l.getTrangThai()) || "CANCELLED".equalsIgnoreCase(l.getTrangThai())))
                     .count());
         } else {
             session.removeAttribute("doctorUser");
