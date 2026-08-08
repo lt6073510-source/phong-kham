@@ -222,7 +222,7 @@
                                                     th:data-bs-target="${'#modalChiTiet' + lk.id}">
                                                 xem
                                             </button>
-                                            <a th:href="@{'/admin/lich-kham/xoa/' + ${lk.id}}" 
+                                            <a th:href="@{'/admin/lich-kham/xoa/' + lk.id}"
                                                class="btn btn-outline-danger"
                                                onclick="return confirm('Bạn có chắc chắn muốn xóa/hủy lịch khám này?');">
                                                 Xóa
@@ -257,7 +257,7 @@
                                                 <p class="mb-1"><strong>Họ tên:</strong> <span th:text="${lk.hoTenBenhNhan != null ? lk.hoTenBenhNhan : 'Chưa cập nhật'}"></span></p>
                                                 <p class="mb-1"><strong>Email:</strong> <span th:text="${lk.email != null ? lk.email : '-'}"></span></p>
                                                 <p class="mb-1"><strong>Số điện thoại:</strong> <span th:text="${lk.soDienThoai != null ? lk.soDienThoai : '-'}"></span></p>
-                                                <p class="mb-0"><strong>Giới tính:</strong> <span th:text="${lk.gioiTinh != null ? lk.gioiTinh : '-'}"></span></p>
+                                                <p class="mb-0"><strong>Giới tính:</strong> <span>-</span></p>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
@@ -265,7 +265,7 @@
                                                 <h6 class="fw-bold text-primary mb-2">👨‍⚕️ Thông Tin Dịch Vụ</h6>
                                                 <p class="mb-1"><strong>Mã Chuyên Khoa:</strong> <span class="badge bg-secondary" th:text="${lk.chuyenKhoaId != null ? lk.chuyenKhoaId : '-'}"></span></p>
                                                 <p class="mb-1"><strong>Bác Sĩ ID:</strong> <span th:text="${lk.bacSiId != null ? lk.bacSiId : 'Phòng khám tự xếp'}"></span></p>
-                                                <p class="mb-0"><strong>Địa chỉ bệnh nhân:</strong> <span th:text="${lk.diaChi != null ? lk.diaChi : '-'}"></span></p>
+<p class="mb-0"><strong>Địa chỉ bệnh nhân:</strong> <span>-</span></p>
                                             </div>
                                         </div>
                                         <div class="col-12">
@@ -287,7 +287,7 @@
                                         <div class="col-12">
                                             <div class="p-3 border rounded bg-warning bg-opacity-10">
                                                 <h6 class="fw-bold text-dark mb-2">🩺 Lý Do Khám / Triệu Chứng</h6>
-                                                <div class="p-2 bg-white rounded border" th:text="${lk.lyDoKham != null && !lk.lyDoKham.isEmpty() ? lk.lyDoKham : 'Không có mô tả lý do khám'}"></div>
+<div class="p-2 bg-white rounded border">Không có mô tả lý do khám</div>
                                             </div>
                                         </div>
                                     </div>
@@ -409,7 +409,7 @@
                                         </td>
                                         <td th:text="${bs.moTa != null ? bs.moTa : 'Chưa cập nhật mô tả...'}">Mô tả kinh nghiệm...</td>
                                         <td class="text-center">
-                                            <button class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="modal" th:data-bs-target="'#modalSuaBS_' + ${bs.id}">
+                                            <button class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="modal"  th:data-bs-target="${'#modalSuaBS_' + bs.id}">
                                                 ✏️ Sửa
                                             </button>
                                             <a th:href="@{/admin/bac-si/xoa/{id}(id=${bs.id})}" class="btn btn-outline-danger btn-sm" onclick="return confirm('Bạn có chắc chắn muốn xóa hồ sơ bác sĩ này?');">
@@ -430,7 +430,7 @@
 
                 <!-- MODAL SỬA HỒ SƠ BÁC SĨ -->
                 <div th:each="bs : ${dsBacSi}">
-                    <div class="modal fade text-start" th:id="'modalSuaBS_' + ${bs.id}" tabindex="-1" aria-hidden="true">
+                    <div class="modal fade text-start" th:id="${'modalSuaBS_' + bs.id}" tabindex="-1" aria-hidden="true">
                         <div class="modal-dialog">
                             <div class="modal-content">
                                 <form th:action="@{/admin/bac-si/cap-nhat}" method="post">

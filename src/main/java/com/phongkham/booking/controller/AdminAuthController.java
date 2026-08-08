@@ -38,8 +38,8 @@ public class AdminAuthController {
     // TRANG ĐĂNG NHẬP CHUNG CHUYỂN HƯỚNG TỰ ĐỘNG
     // ==========================================
 
-    // ĐÃ SỬA: Xóa dấu phẩy thừa trong mảng Mapping
-    @GetMapping({"/login", "/dang_nhap", "/dang-nhap"})
+// ĐÃ SỬA: Chỉ giữ /login để tránh trùng mapping với WebController
+    @GetMapping("/login")
     public String trangDangNhap(HttpSession session) {
         if (session != null) {
             if (session.getAttribute("adminUser") != null) {
@@ -52,8 +52,8 @@ public class AdminAuthController {
         return "dang_nhap";
     }
 
-    // ĐÃ SỬA: Xóa dấu phẩy thừa trong mảng Mapping
-    @PostMapping({"/dang_nhap", "/dang-nhap"})
+// ĐÃ SỬA: Đổi sang /admin/login-tu-dong để tránh trùng mapping với WebController
+    @PostMapping("/admin/login-tu-dong")
     public String xuLyDangNhapTuDong(@RequestParam("email") String email,
                                      @RequestParam(value = "matKhau", required = false) String matKhauVN,
                                      @RequestParam(value = "password", required = false) String matKhauEN,

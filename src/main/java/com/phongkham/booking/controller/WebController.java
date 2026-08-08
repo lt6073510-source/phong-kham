@@ -13,6 +13,7 @@ import com.phongkham.booking.service.LichKhamService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -32,6 +33,7 @@ import java.util.Map;
 import java.util.HashMap;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Controller
 public class WebController {
@@ -48,8 +50,21 @@ public class WebController {
     @Autowired
     private ChuyenKhoaService chuyenKhoaService;
 
-    @Autowired
+@Autowired
     private BacSiService bacSiService;
+
+@Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Value("${admin1.username:admin1}")
+    private String admin1User;
+    @Value("${admin1.password:AdminPass123!}")
+    private String admin1Pass;
+
+    @Value("${admin2.username:admin2}")
+    private String admin2User;
+    @Value("${admin2.password:AdminPass456!}")
+    private String admin2Pass;
 
     // =========================================================
     // 1. CÁC TRANG GIAO DIỆN CHUNG & TĨNH
@@ -80,44 +95,25 @@ public class WebController {
                                HttpSession session,
                                RedirectAttributes redirectAttributes) {
 
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+// =============================================
+        // 1. KIỂM TRA TÀI KHOẢN ADMIN (cấu hình cố định)
+        // =============================================
+        boolean isAdmin1 = admin1User.equalsIgnoreCase(email) && admin1Pass.equals(matKhau);
+        boolean isAdmin2 = admin2User.equalsIgnoreCase(email) && admin2Pass.equals(matKhau);
 
-        // Load admin hashes from env vars (recommended)
-        String admin1Email = System.getenv("APP_ADMIN1_EMAIL");
-        String admin1Hash  = System.getenv("APP_ADMIN1_PASS_HASH");
-        String admin2Email = System.getenv("APP_ADMIN2_EMAIL");
-        String admin2Hash  = System.getenv("APP_ADMIN2_PASS_HASH");
-
-        if ((admin1Email == null || admin1Hash == null) && (admin2Email == null || admin2Hash == null)) {
-            admin1Email = "admin1";
-            admin1Hash  = encoder.encode("AdminPass123!");
-            admin2Email = "admin2";
-            admin2Hash  = encoder.encode("AdminPass456!");
-        }
-
-        // Check admin1
-        if (admin1Email != null && admin1Email.equalsIgnoreCase(email) && admin1Hash != null && encoder.matches(matKhau, admin1Hash)) {
+        if (isAdmin1 || isAdmin2) {
             session.invalidate();
             HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
             HttpSession newSession = request.getSession(true);
-            newSession.setAttribute("userEmail", admin1Email);
+            newSession.setAttribute("adminUser", email);
+            newSession.setAttribute("userEmail", email);
             newSession.setAttribute("userName", "Administrator");
             newSession.setAttribute("userRole", "ADMIN");
+            newSession.setAttribute("role", "ADMIN");
             return "redirect:/admin";
         }
 
-        // Check admin2
-        if (admin2Email != null && admin2Email.equalsIgnoreCase(email) && admin2Hash != null && encoder.matches(matKhau, admin2Hash)) {
-            session.invalidate();
-            HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
-            HttpSession newSession = request.getSession(true);
-            newSession.setAttribute("userEmail", admin2Email);
-            newSession.setAttribute("userName", "Administrator");
-            newSession.setAttribute("userRole", "ADMIN");
-            return "redirect:/admin";
-        }
-
-        // 1. ƯU TIÊN KIỂM TRA BỆNH NHÂN TRƯỚC
+        // 2. ƯU TIÊN KIỂM TRA BỆNH NHÂN TRƯỚC
         Optional<NguoiDungBenhNhan> userOpt = khoNguoiDungBenhNhan.findByEmail(email);
         if (userOpt.isPresent() && userOpt.get().getMatKhau().equals(matKhau)) {
             NguoiDungBenhNhan user = userOpt.get();
@@ -125,35 +121,40 @@ public class WebController {
             HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
             HttpSession newSession = request.getSession(true);
 
-            newSession.setAttribute("userLuuSinh", user);
+newSession.setAttribute("userLuuSinh", user);
             newSession.setAttribute("userId", user.getId());
             newSession.setAttribute("userEmail", user.getEmail());
             newSession.setAttribute("userName", user.getHoTen());
+            newSession.setAttribute("userPhone", user.getSoDienThoai());
             newSession.setAttribute("userRole", "BENH_NHAN");
             return "redirect:/";
         }
 
-        // 2. SAU ĐÓ MỚI KIỂM TRA BÁC SĨ
+// 2. SAU ĐÓ MỚI KIỂM TRA BÁC SĨ
         Optional<BacSi> bacSiOpt = khoBacSi.findByEmail(email);
-        if (bacSiOpt.isPresent() && bacSiOpt.get().getMatKhau().equals(matKhau)) {
+        if (bacSiOpt.isPresent() &&
+                (passwordEncoder.matches(matKhau, bacSiOpt.get().getMatKhau())
+                 || bacSiOpt.get().getMatKhau().equals(matKhau))) {
             BacSi bs = bacSiOpt.get();
             session.invalidate();
             HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
             HttpSession newSession = request.getSession(true);
 
-            newSession.setAttribute("userLuuSinh", bs);
+newSession.setAttribute("userLuuSinh", bs);
             newSession.setAttribute("doctorId", bs.getId()); 
             newSession.setAttribute("bacSiId", bs.getId()); 
+            newSession.setAttribute("doctorUser", bs.getEmail());
             newSession.setAttribute("userEmail", bs.getEmail());
             newSession.setAttribute("userName", bs.getHoTen());
 
             String vaiTro = bs.getVaiTro() != null ? bs.getVaiTro().toUpperCase() : "BAC_SI";
             newSession.setAttribute("userRole", vaiTro);
+            newSession.setAttribute("role", "DOCTOR");
 
             if ("ADMIN".equals(vaiTro)) {
                 return "redirect:/admin";
             } else {
-                return "redirect:/bac-si/dashboard";
+                return "redirect:/bac_si";
             }
         }
 
@@ -237,11 +238,24 @@ public class WebController {
         try {
             LichKham newLich = new LichKham();
 
-            newLich.setHoTenBenhNhan(fullName);
+newLich.setHoTenBenhNhan(fullName);
             newLich.setTenBenhNhan(fullName);
             newLich.setSoDienThoai(phone);
 
-            String userEmail = (email != null && !email.isBlank()) ? email : (String) session.getAttribute("userEmail");
+            // Nếu bệnh nhân đã đăng nhập thì ưu tiên dùng email + SĐT từ tài khoản
+            // để lịch sử đăng ký tra cứu được chính xác
+            Object sessRole = session.getAttribute("userRole");
+            String sessEmail = (String) session.getAttribute("userEmail");
+            String userEmail;
+            if ("BENH_NHAN".equalsIgnoreCase(sessRole != null ? sessRole.toString() : "") && sessEmail != null && !sessEmail.isBlank()) {
+                userEmail = sessEmail;
+                String sessPhone = (String) session.getAttribute("userPhone");
+                if (sessPhone != null && !sessPhone.isBlank()) {
+                    newLich.setSoDienThoai(sessPhone);
+                }
+            } else {
+                userEmail = (email != null && !email.isBlank()) ? email : sessEmail;
+            }
             newLich.setEmail(userEmail);
 
             if (doctorId != null) {
@@ -299,8 +313,8 @@ public class WebController {
             @RequestParam(name = "fullName", required = false) String fullName,
             @RequestParam(name = "phone", required = false) String phone,
             @RequestParam(name = "email", required = false) String email,
-            @RequestParam(name = "departmentId", required = false) Integer departmentId,
-            @RequestParam(name = "doctorId", required = false) Long doctorId,
+@RequestParam(name = "departmentId", required = false) String departmentIdStr,
+            @RequestParam(name = "doctorId", required = false) String doctorIdStr,
             @RequestParam(name = "appointmentDate", required = false) String appointmentDate,
             @RequestParam(name = "appointmentTime", required = false) String appointmentTime,
             @RequestParam(name = "symptoms", required = false) String symptoms,
@@ -310,36 +324,74 @@ public class WebController {
         try {
             LichKham newLich = new LichKham();
 
-            newLich.setHoTenBenhNhan(fullName);
+newLich.setHoTenBenhNhan(fullName);
             newLich.setTenBenhNhan(fullName);
             newLich.setSoDienThoai(phone);
 
-            String userEmail = (email != null && !email.isBlank()) ? email : (String) session.getAttribute("userEmail");
+            // Nếu bệnh nhân đã đăng nhập thì ưu tiên dùng email + SĐT từ tài khoản
+            // để lịch sử đăng ký tra cứu được chính xác
+            Object sessRole = session.getAttribute("userRole");
+            String sessEmail = (String) session.getAttribute("userEmail");
+            String userEmail;
+            if ("BENH_NHAN".equalsIgnoreCase(sessRole != null ? sessRole.toString() : "") && sessEmail != null && !sessEmail.isBlank()) {
+                userEmail = sessEmail;
+                String sessPhone = (String) session.getAttribute("userPhone");
+                if (sessPhone != null && !sessPhone.isBlank()) {
+                    newLich.setSoDienThoai(sessPhone);
+                }
+            } else {
+                userEmail = (email != null && !email.isBlank()) ? email : sessEmail;
+            }
             newLich.setEmail(userEmail);
 
+            Long doctorId = null;
+            if (doctorIdStr != null && !doctorIdStr.isBlank()) {
+                try {
+                    doctorId = Long.valueOf(doctorIdStr.trim());
+                } catch (NumberFormatException ignore) {
+                    doctorId = null;
+                }
+            }
             if (doctorId != null) {
-                newLich.setBacSiId(doctorId);
-                bacSiService.getBacSiById(doctorId.intValue()).ifPresent(bs -> newLich.setTenBacSi(bs.getHoTen()));
+                // CHỈ gán quan hệ bác sĩ nếu bác sĩ thực sự tồn tại (tránh lỗi Foreign Key)
+                Optional<BacSi> bsOpt = bacSiService.getBacSiById(doctorId.intValue());
+                if (bsOpt.isPresent()) {
+                    newLich.setBacSi(bsOpt.get());
+                    newLich.setBacSiId(doctorId);
+                    newLich.setTenBacSi(bsOpt.get().getHoTen());
+                }
             }
 
             newLich.setNgayKham(appointmentDate);
             newLich.setGioKham(appointmentTime != null ? appointmentTime : "");
             newLich.setGhiChu(symptoms != null ? symptoms : "");
             newLich.setTrangThai("CHO_XAC_NHAN");
-            newLich.setNgayDat(LocalDateTime.now());
+newLich.setNgayDat(LocalDateTime.now());
             newLich.setNgayTao(LocalDateTime.now());
 
+            Integer departmentId = null;
+            if (departmentIdStr != null && !departmentIdStr.isBlank()) {
+                try {
+                    departmentId = Integer.valueOf(departmentIdStr.trim());
+                } catch (NumberFormatException ignore) {
+                    departmentId = null;
+                }
+            }
             if (departmentId != null) {
                 ChuyenKhoa ck = chuyenKhoaService.getChuyenKhoaById(departmentId).orElse(null);
                 if (ck != null) newLich.setChuyenKhoaId(ck.getId().longValue());
             }
 
-            Object userIdObj = session.getAttribute("userId");
+Object userIdObj = session.getAttribute("userId");
             if (userIdObj != null) {
-                Long userId = Long.valueOf(userIdObj.toString());
-                NguoiDungBenhNhan bn = new NguoiDungBenhNhan();
-                bn.setId(userId);
-                newLich.setBenhNhan(bn);
+                try {
+                    Long userId = Long.valueOf(userIdObj.toString());
+                    // Chỉ gán benh_nhan nếu tài khoản bệnh nhân thực sự tồn tại
+                    khoNguoiDungBenhNhan.findById(userId).ifPresent(newLich::setBenhNhan);
+                } catch (Exception ignore) {
+                    // Nếu không gắn được benh_nhan (vd foreign key) thì bỏ qua,
+                    // lịch vẫn lưu được với email + SĐT để tra cứu lịch sử.
+                }
             }
 
             lichKhamService.taoLichKham(newLich);
@@ -367,18 +419,24 @@ public class WebController {
             return "redirect:/dang-nhap";
         }
 
-        List<LichKham> dsLichKham = new ArrayList<>();
+List<LichKham> dsLichKham = new ArrayList<>();
         if (userEmail != null && !userEmail.isBlank()) {
-            dsLichKham.addAll(lichKhamService.getLichByEmail(userEmail));
+            dsLichKham.addAll(lichKhamService.getLichByEmail(userEmail.trim()));
         }
 
         Object userIdObj = session.getAttribute("userId");
         if (userIdObj != null) {
             try {
-                Integer userId = Integer.valueOf(userIdObj.toString());
+                Long userId = Long.valueOf(userIdObj.toString().trim());
                 dsLichKham.addAll(lichKhamService.getLichByBenhNhanId(userId));
             } catch (NumberFormatException ignored) {
             }
+        }
+
+        // Bổ sung tra cứu theo SĐT đã lưu trong session (bắt các lịch đặt công khai có SĐT)
+        Object userPhoneObj = session.getAttribute("userPhone");
+        if (userPhoneObj != null && !userPhoneObj.toString().isBlank()) {
+            dsLichKham.addAll(lichKhamService.getLichBySoDienThoai(userPhoneObj.toString().trim()));
         }
 
         Map<Integer, LichKham> uniqueAppointments = new LinkedHashMap<>();

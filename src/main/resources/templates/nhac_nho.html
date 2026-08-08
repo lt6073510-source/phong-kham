@@ -29,22 +29,21 @@
         <div class="custom-card p-4 shadow-sm">
             <h6 class="fw-bold text-uppercase text-secondary mb-3 fs-7">Danh sách bệnh nhân cần tái khám</h6>
             
-            <div class="table-responsive">
+<div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
                     <thead class="table-light">
                         <tr>
                             <th>#</th>
                             <th>Bệnh nhân</th>
                             <th>Số điện thoại</th>
-                            <th>Ngày hẹn tái khám</th>
-                            <th>Ghi chú / Chẩn đoán</th>
-                            <th>Thao tác</th>
+                            <th>Ngày tái khám</th>
+                            <th>Còn lại</th>
                         </tr>
                     </thead>
                     <tbody>
                         <!-- Nếu không có dữ liệu -->
                         <tr th:if="${reminders == null || #lists.isEmpty(reminders)}">
-                            <td colspan="6" class="text-center text-muted py-4">Hiện tại chưa có nhắc nhở tái khám nào.</td>
+                            <td colspan="5" class="text-center text-muted py-4">Hiện tại chưa có lịch tái khám nào.</td>
                         </tr>
 
                         <!-- Vòng lặp hiển thị danh sách tái khám -->
@@ -52,13 +51,25 @@
                             <td th:text="${stat.count}">1</td>
                             <td><span class="fw-bold" th:text="${item.hoTenBenhNhan}">Nguyễn Văn A</span></td>
                             <td th:text="${item.soDienThoai}">0901234567</td>
-                            <td><span class="badge bg-warning text-dark fs-7" th:text="${item.ngayTaiKham}">2026-08-10</span></td>
-                            <td th:text="${item.ghiChu != null ? item.ghiChu : 'Tái khám định kỳ'}">Tái khám định kỳ</td>
+<td>
+                                <span class="badge bg-warning text-dark fs-7"
+                                      th:text="${item.ngayTaiKham != null ? item.ngayTaiKham : '-'}">
+                                    2026-08-19
+                                </span>
+                            </td>
                             <td>
-                                <button class="btn btn-sm btn-primary rounded-2" 
-                                        th:onclick="'sendReminder(' + ${item.id} + ', this)'">
-                                    <i class="fa-regular fa-paper-plane me-1"></i> Gửi nhắc nhở
-                                </button>
+                                <span class="badge"
+                                      th:classappend="${item.soNgayConLai > 3 ? ' bg-info text-dark' :
+                                       item.soNgayConLai > 0 ? ' bg-warning text-dark' :
+                                       item.soNgayConLai == 0 ? ' bg-danger text-white' :
+                                       ' bg-secondary text-white'}"
+                                      th:text="${item.soNgayConLai > 0 ?
+                                       'Còn ' + item.soNgayConLai + ' ngày' :
+                                       item.soNgayConLai == 0 ?
+                                       'Hôm nay' :
+                                       'Đã quá lịch'}">
+                                    Còn 10 ngày
+                                </span>
                             </td>
                         </tr>
                     </tbody>
@@ -66,41 +77,5 @@
             </div>
         </div>
     </div>
-
-    <!-- JavaScript xử lý gọi API gửi thông báo/Email/SMS -->
-    <script>
-        function sendReminder(reminderId, btn) {
-            if (!confirm("Bạn có chắc chắn muốn gửi thông báo nhắc lịch tái khám cho bệnh nhân này?")) {
-                return;
-            }
-
-            // Đổi trạng thái button để tránh nhấn nhiều lần
-            const originalText = btn.innerHTML;
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Đang gửi...';
-
-            fetch('/api/nhac-nho/gui/' + reminderId, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => {
-                if (response.ok) {
-                    alert('Đã gửi thông báo nhắc lịch thành công!');
-                    btn.className = 'btn btn-sm btn-success rounded-2';
-                    btn.innerHTML = '<i class="fa-solid fa-check me-1"></i> Đã gửi';
-                } else {
-                    throw new Error('Gửi thất bại');
-                }
-            })
-            .catch(error => {
-                console.error('Lỗi:', error);
-                alert('Không thể gửi nhắc nhở. Vui lòng thử lại sau!');
-                btn.disabled = false;
-                btn.innerHTML = originalText;
-            });
-        }
-    </script>
 </body>
 </html>

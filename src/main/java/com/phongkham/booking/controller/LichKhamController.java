@@ -52,9 +52,9 @@ public class LichKhamController {
         return ResponseEntity.ok(lichKhamService.getLichByBacSi(bacSiId));
     }
 
-    // 6. Lấy lịch khám theo Bệnh nhân ID
+// 6. Lấy lịch khám theo Bệnh nhân ID
     @GetMapping("/benhnhan/{benhNhanId}")
-    public ResponseEntity<List<LichKham>> getLichByBenhNhanId(@PathVariable("benhNhanId") Integer benhNhanId) {
+    public ResponseEntity<List<LichKham>> getLichByBenhNhanId(@PathVariable("benhNhanId") Long benhNhanId) {
         return ResponseEntity.ok(lichKhamService.getLichByBenhNhanId(benhNhanId));
     }
 
@@ -114,7 +114,7 @@ public class LichKhamController {
         }
     }
 
-    // 12. Xóa lịch khám theo ID
+// 12. Xóa lịch khám theo ID
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> xoaLichKham(@PathVariable("id") Integer id) {
         lichKhamService.xoaLichKham(id);

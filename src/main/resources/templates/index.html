@@ -49,13 +49,15 @@
         nav ul li a { background-color: var(--blue-main); color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; transition: 0.3s; display: inline-block; }
         nav ul li a:hover { background-color: var(--blue-hover); transform: translateY(-1px); }
 
-        /* --- DROPDOWN CHUYÊN KHOA ĐỘNG --- */
-        nav ul li.dropdown { position: relative; }
+/* --- DROPDOWN CHUYÊN KHOA ĐỘNG (Click để mở) --- */
+        nav ul li.dropdown { position: relative; cursor: pointer; }
         nav ul li.dropdown .dropdown-menu { display: none; position: absolute; top: 100%; left: 0; background-color: #ffffff; min-width: 240px; box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.15); border-radius: 8px; padding: 8px 0; z-index: 9999; list-style: none; text-align: left; margin-top: 5px; border: 1px solid #eee; }
+        nav ul li.dropdown.open .dropdown-menu { display: block; }
         nav ul li.dropdown .dropdown-menu li { width: 100%; margin: 0; }
         nav ul li.dropdown .dropdown-menu li a { background-color: transparent !important; color: #333333 !important; padding: 12px 20px !important; display: block !important; font-weight: 500 !important; border-radius: 0 !important; white-space: nowrap; transition: 0.2s; }
         nav ul li.dropdown .dropdown-menu li a:hover { background-color: #f0f7ff !important; color: var(--blue-main) !important; padding-left: 25px !important; }
-        nav ul li.dropdown:hover .dropdown-menu { display: block; }
+        /* Mũi tên chỉ xuống */
+        nav ul li.dropdown > a::after { content: " ▾"; font-size: 10px; vertical-align: middle; }
 
         /* --- BANNER CHÍNH --- */
         .slogan-vang { color: #d4ac0d; font-size: 28px; font-weight: bold; text-align: center; margin: 30px 0 20px 0; }
@@ -228,7 +230,39 @@
                 <button class="btn-social">Truy cập Fanpage</button>
             </div>
         </div>
-        <div class="copyright">© 2026 Bản quyền thuộc về Phòng Khám Đa Khoa An Tâm</div>
+<div class="copyright">© 2026 Bản quyền thuộc về Phòng Khám Đa Khoa An Tâm</div>
     </footer>
+
+    <!-- JS XỬ LÝ DROPDOWN CHUYÊN KHOA (Click để mở/đóng) -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const dropdown = document.querySelector("nav ul li.dropdown");
+
+            if (dropdown) {
+                // Click vào mục "Chuyên khoa" để mở/đóng menu
+                dropdown.addEventListener("click", function (e) {
+                    // Chặn chuyển trang của thẻ <a> khi bấm vào chính nó
+                    if (e.target.tagName === "A" && e.target.closest(".dropdown-menu") === null) {
+                        e.preventDefault();
+                    }
+                    dropdown.classList.toggle("open");
+                });
+
+                // Click vào 1 chuyên khoa trong menu con -> cho phép điều hướng bình thường
+                dropdown.querySelectorAll(".dropdown-menu a").forEach(function (link) {
+                    link.addEventListener("click", function (e) {
+                        e.stopPropagation(); // không làm đóng/mở lại menu
+                    });
+                });
+            }
+
+            // Click ra ngoài menu -> đóng dropdown
+            document.addEventListener("click", function (e) {
+                if (dropdown && !dropdown.contains(e.target)) {
+                    dropdown.classList.remove("open");
+                }
+            });
+        });
+    </script>
 </body>
 </html>

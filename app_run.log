@@ -1,0 +1,154 @@
+[INFO] Scanning for projects...
+[WARNING] 
+[WARNING] Some problems were encountered while building the effective model for com.phongkham:booking:jar:0.0.1-SNAPSHOT
+[WARNING] 'dependencies.dependency.(groupId:artifactId:type:classifier)' must be unique: org.springframework.boot:spring-boot-starter-data-jpa:jar -> duplicate declaration of version (?) @ line 46, column 13
+[WARNING] 'dependencies.dependency.(groupId:artifactId:type:classifier)' must be unique: org.springframework.boot:spring-boot-starter-data-jpa:jar -> duplicate declaration of version (?) @ line 50, column 13
+[WARNING] 'dependencies.dependency.(groupId:artifactId:type:classifier)' must be unique: com.mysql:mysql-connector-j:jar -> duplicate declaration of version (?) @ line 64, column 13
+[WARNING] 'dependencies.dependency.(groupId:artifactId:type:classifier)' must be unique: com.mysql:mysql-connector-j:jar -> duplicate declaration of version (?) @ line 69, column 13
+[WARNING] 
+[WARNING] It is highly recommended to fix these problems because they threaten the stability of your build.
+[WARNING] 
+[WARNING] For this reason, future Maven versions might no longer support building such malformed projects.
+[WARNING] 
+[INFO] 
+[INFO] -----------------------< com.phongkham:booking >------------------------
+[INFO] Building booking 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] >>> spring-boot:4.1.0:run (default-cli) > test-compile @ booking >>>
+[INFO] 
+[INFO] --- resources:3.5.0:resources (default-resources) @ booking ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 43 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.15.0:compile (default-compile) @ booking ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.5.0:testResources (default-testResources) @ booking ---
+[INFO] skip non existing resourceDirectory D:\DUANPHONGKHAM\booking\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.15.0:testCompile (default-testCompile) @ booking ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] <<< spring-boot:4.1.0:run (default-cli) < test-compile @ booking <<<
+[INFO] 
+[INFO] 
+[INFO] --- spring-boot:4.1.0:run (default-cli) @ booking ---
+[INFO] Attaching agents: []
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.1.0)
+
+2026-08-09T03:06:56.347+07:00  INFO 11140 --- [  restartedMain] c.phongkham.booking.BookingApplication   : Starting BookingApplication using Java 17.0.12 with PID 11140 (D:\DUANPHONGKHAM\booking\target\classes started by lt607 in D:\DUANPHONGKHAM\booking)
+2026-08-09T03:06:56.353+07:00  INFO 11140 --- [  restartedMain] c.phongkham.booking.BookingApplication   : No active profile set, falling back to 1 default profile: "default"
+2026-08-09T03:06:56.438+07:00  INFO 11140 --- [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2026-08-09T03:06:56.439+07:00  INFO 11140 --- [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-08-09T03:06:57.670+07:00  INFO 11140 --- [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-09T03:06:57.776+07:00  INFO 11140 --- [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 90 ms. Found 7 JPA repository interfaces.
+2026-08-09T03:06:58.673+07:00  INFO 11140 --- [  restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 8085 (http)
+2026-08-09T03:06:58.693+07:00  INFO 11140 --- [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-08-09T03:06:58.693+07:00  INFO 11140 --- [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.22]
+2026-08-09T03:06:58.756+07:00  INFO 11140 --- [  restartedMain] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 2316 ms
+2026-08-09T03:06:59.042+07:00  INFO 11140 --- [  restartedMain] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-08-09T03:06:59.153+07:00  INFO 11140 --- [  restartedMain] org.hibernate.orm.core                   : HHH000001: Hibernate ORM core version 7.4.1.Final
+2026-08-09T03:07:00.149+07:00  INFO 11140 --- [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-09T03:07:00.206+07:00  INFO 11140 --- [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-08-09T03:07:00.727+07:00  INFO 11140 --- [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@7f7ca507
+2026-08-09T03:07:00.732+07:00  INFO 11140 --- [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-08-09T03:07:00.883+07:00  WARN 11140 --- [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: MySQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-08-09T03:07:00.908+07:00  INFO 11140 --- [  restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:mysql://localhost:3306/phongkham?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true]
+	Database driver: MySQL Connector/J
+	Database dialect: MySQLDialect
+	Database version: 8.0.36
+	Default catalog/schema: phongkham/undefined
+	Autocommit mode: undefined/unknown
+	Isolation level: REPEATABLE_READ [default REPEATABLE_READ]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-08-09T03:07:02.815+07:00  INFO 11140 --- [  restartedMain] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-08-09T03:07:03.083+07:00  INFO 11140 --- [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-09T03:07:03.229+07:00  INFO 11140 --- [  restartedMain] o.s.d.j.r.query.QueryEnhancerFactories   : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-08-09T03:07:03.785+07:00  WARN 11140 --- [  restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-08-09T03:07:03.880+07:00  WARN 11140 --- [  restartedMain] .s.a.UserDetailsServiceAutoConfiguration : 
+
+Using generated security password: eadc844d-846f-4d5c-a36c-6448ec5a4ff7
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-08-09T03:07:03.891+07:00  INFO 11140 --- [  restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+2026-08-09T03:07:04.118+07:00  INFO 11140 --- [  restartedMain] o.s.b.w.a.WelcomePageHandlerMapping      : Adding welcome page template: index
+2026-08-09T03:07:04.731+07:00  INFO 11140 --- [  restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 8085 (http) with context path '/'
+2026-08-09T03:07:04.738+07:00  INFO 11140 --- [  restartedMain] c.phongkham.booking.BookingApplication   : Started BookingApplication in 9.078 seconds (process running for 10.393)
+Hibernate: select count(*) from chuyenkhoa ck1_0
+Hibernate: select count(*) from bacsi bs1_0
+>>> CHECK DB C?: Chuyên khoa = 5 | Bác s? = 19
+Hibernate: select ck1_0.id,ck1_0.doan_gioi_thieu,ck1_0.hinh_anh,ck1_0.loi_ket,ck1_0.ma_khoa,ck1_0.mo_ta,ck1_0.phu_de_banner,ck1_0.ten_chuyen_khoa_cu,ck1_0.ten_chuyen_khoa,ck1_0.tieu_de_hang_muc from chuyenkhoa ck1_0
+Hibernate: select bs1_0.id,bs1_0.anh,bs1_0.chuyen_khoa_id,bs1_0.email,bs1_0.gia_kham,bs1_0.ho_ten,bs1_0.hoc_vi,bs1_0.mat_khau,bs1_0.mo_ta,bs1_0.ngay_tao,bs1_0.so_dien_thoai,bs1_0.so_nam_kinh_nghiem,bs1_0.trang_thai,bs1_0.vai_tro from bacsi bs1_0 where bs1_0.email=?
+Hibernate: select ck1_0.id,ck1_0.doan_gioi_thieu,ck1_0.hinh_anh,ck1_0.loi_ket,ck1_0.ma_khoa,ck1_0.mo_ta,ck1_0.phu_de_banner,ck1_0.ten_chuyen_khoa_cu,ck1_0.ten_chuyen_khoa,ck1_0.tieu_de_hang_muc from chuyenkhoa ck1_0 where ck1_0.id=?
+Hibernate: select bs1_0.id,bs1_0.anh,bs1_0.chuyen_khoa_id,bs1_0.email,bs1_0.gia_kham,bs1_0.ho_ten,bs1_0.hoc_vi,bs1_0.mat_khau,bs1_0.mo_ta,bs1_0.ngay_tao,bs1_0.so_dien_thoai,bs1_0.so_nam_kinh_nghiem,bs1_0.trang_thai,bs1_0.vai_tro from bacsi bs1_0 where bs1_0.email=?
+Hibernate: select ck1_0.id,ck1_0.doan_gioi_thieu,ck1_0.hinh_anh,ck1_0.loi_ket,ck1_0.ma_khoa,ck1_0.mo_ta,ck1_0.phu_de_banner,ck1_0.ten_chuyen_khoa_cu,ck1_0.ten_chuyen_khoa,ck1_0.tieu_de_hang_muc from chuyenkhoa ck1_0 where ck1_0.id=?
+Hibernate: select bs1_0.id,bs1_0.anh,bs1_0.chuyen_khoa_id,bs1_0.email,bs1_0.gia_kham,bs1_0.ho_ten,bs1_0.hoc_vi,bs1_0.mat_khau,bs1_0.mo_ta,bs1_0.ngay_tao,bs1_0.so_dien_thoai,bs1_0.so_nam_kinh_nghiem,bs1_0.trang_thai,bs1_0.vai_tro from bacsi bs1_0 where bs1_0.email=?
+Hibernate: select ck1_0.id,ck1_0.doan_gioi_thieu,ck1_0.hinh_anh,ck1_0.loi_ket,ck1_0.ma_khoa,ck1_0.mo_ta,ck1_0.phu_de_banner,ck1_0.ten_chuyen_khoa_cu,ck1_0.ten_chuyen_khoa,ck1_0.tieu_de_hang_muc from chuyenkhoa ck1_0 where ck1_0.id=?
+Hibernate: select bs1_0.id,bs1_0.anh,bs1_0.chuyen_khoa_id,bs1_0.email,bs1_0.gia_kham,bs1_0.ho_ten,bs1_0.hoc_vi,bs1_0.mat_khau,bs1_0.mo_ta,bs1_0.ngay_tao,bs1_0.so_dien_thoai,bs1_0.so_nam_kinh_nghiem,bs1_0.trang_thai,bs1_0.vai_tro from bacsi bs1_0 where bs1_0.email=?
+Hibernate: select ck1_0.id,ck1_0.doan_gioi_thieu,ck1_0.hinh_anh,ck1_0.loi_ket,ck1_0.ma_khoa,ck1_0.mo_ta,ck1_0.phu_de_banner,ck1_0.ten_chuyen_khoa_cu,ck1_0.ten_chuyen_khoa,ck1_0.tieu_de_hang_muc from chuyenkhoa ck1_0 where ck1_0.id=?
+Hibernate: select bs1_0.id,bs1_0.anh,bs1_0.chuyen_khoa_id,bs1_0.email,bs1_0.gia_kham,bs1_0.ho_ten,bs1_0.hoc_vi,bs1_0.mat_khau,bs1_0.mo_ta,bs1_0.ngay_tao,bs1_0.so_dien_thoai,bs1_0.so_nam_kinh_nghiem,bs1_0.trang_thai,bs1_0.vai_tro from bacsi bs1_0 where bs1_0.email=?
+Hibernate: select ck1_0.id,ck1_0.doan_gioi_thieu,ck1_0.hinh_anh,ck1_0.loi_ket,ck1_0.ma_khoa,ck1_0.mo_ta,ck1_0.phu_de_banner,ck1_0.ten_chuyen_khoa_cu,ck1_0.ten_chuyen_khoa,ck1_0.tieu_de_hang_muc from chuyenkhoa ck1_0 where ck1_0.id=?
+Hibernate: select bs1_0.id,bs1_0.anh,bs1_0.chuyen_khoa_id,bs1_0.email,bs1_0.gia_kham,bs1_0.ho_ten,bs1_0.hoc_vi,bs1_0.mat_khau,bs1_0.mo_ta,bs1_0.ngay_tao,bs1_0.so_dien_thoai,bs1_0.so_nam_kinh_nghiem,bs1_0.trang_thai,bs1_0.vai_tro from bacsi bs1_0 where bs1_0.email=?
+Hibernate: select ck1_0.id,ck1_0.doan_gioi_thieu,ck1_0.hinh_anh,ck1_0.loi_ket,ck1_0.ma_khoa,ck1_0.mo_ta,ck1_0.phu_de_banner,ck1_0.ten_chuyen_khoa_cu,ck1_0.ten_chuyen_khoa,ck1_0.tieu_de_hang_muc from chuyenkhoa ck1_0 where ck1_0.id=?
+Hibernate: select bs1_0.id,bs1_0.anh,bs1_0.chuyen_khoa_id,bs1_0.email,bs1_0.gia_kham,bs1_0.ho_ten,bs1_0.hoc_vi,bs1_0.mat_khau,bs1_0.mo_ta,bs1_0.ngay_tao,bs1_0.so_dien_thoai,bs1_0.so_nam_kinh_nghiem,bs1_0.trang_thai,bs1_0.vai_tro from bacsi bs1_0 where bs1_0.email=?
+Hibernate: select ck1_0.id,ck1_0.doan_gioi_thieu,ck1_0.hinh_anh,ck1_0.loi_ket,ck1_0.ma_khoa,ck1_0.mo_ta,ck1_0.phu_de_banner,ck1_0.ten_chuyen_khoa_cu,ck1_0.ten_chuyen_khoa,ck1_0.tieu_de_hang_muc from chuyenkhoa ck1_0 where ck1_0.id=?
+Hibernate: select bs1_0.id,bs1_0.anh,bs1_0.chuyen_khoa_id,bs1_0.email,bs1_0.gia_kham,bs1_0.ho_ten,bs1_0.hoc_vi,bs1_0.mat_khau,bs1_0.mo_ta,bs1_0.ngay_tao,bs1_0.so_dien_thoai,bs1_0.so_nam_kinh_nghiem,bs1_0.trang_thai,bs1_0.vai_tro from bacsi bs1_0 where bs1_0.email=?
+Hibernate: select ck1_0.id,ck1_0.doan_gioi_thieu,ck1_0.hinh_anh,ck1_0.loi_ket,ck1_0.ma_khoa,ck1_0.mo_ta,ck1_0.phu_de_banner,ck1_0.ten_chuyen_khoa_cu,ck1_0.ten_chuyen_khoa,ck1_0.tieu_de_hang_muc from chuyenkhoa ck1_0 where ck1_0.id=?
+Hibernate: select bs1_0.id,bs1_0.anh,bs1_0.chuyen_khoa_id,bs1_0.email,bs1_0.gia_kham,bs1_0.ho_ten,bs1_0.hoc_vi,bs1_0.mat_khau,bs1_0.mo_ta,bs1_0.ngay_tao,bs1_0.so_dien_thoai,bs1_0.so_nam_kinh_nghiem,bs1_0.trang_thai,bs1_0.vai_tro from bacsi bs1_0 where bs1_0.email=?
+Hibernate: select ck1_0.id,ck1_0.doan_gioi_thieu,ck1_0.hinh_anh,ck1_0.loi_ket,ck1_0.ma_khoa,ck1_0.mo_ta,ck1_0.phu_de_banner,ck1_0.ten_chuyen_khoa_cu,ck1_0.ten_chuyen_khoa,ck1_0.tieu_de_hang_muc from chuyenkhoa ck1_0 where ck1_0.id=?
+Hibernate: select bs1_0.id,bs1_0.anh,bs1_0.chuyen_khoa_id,bs1_0.email,bs1_0.gia_kham,bs1_0.ho_ten,bs1_0.hoc_vi,bs1_0.mat_khau,bs1_0.mo_ta,bs1_0.ngay_tao,bs1_0.so_dien_thoai,bs1_0.so_nam_kinh_nghiem,bs1_0.trang_thai,bs1_0.vai_tro from bacsi bs1_0 where bs1_0.email=?
+Hibernate: select ck1_0.id,ck1_0.doan_gioi_thieu,ck1_0.hinh_anh,ck1_0.loi_ket,ck1_0.ma_khoa,ck1_0.mo_ta,ck1_0.phu_de_banner,ck1_0.ten_chuyen_khoa_cu,ck1_0.ten_chuyen_khoa,ck1_0.tieu_de_hang_muc from chuyenkhoa ck1_0 where ck1_0.id=?
+Hibernate: select bs1_0.id,bs1_0.anh,bs1_0.chuyen_khoa_id,bs1_0.email,bs1_0.gia_kham,bs1_0.ho_ten,bs1_0.hoc_vi,bs1_0.mat_khau,bs1_0.mo_ta,bs1_0.ngay_tao,bs1_0.so_dien_thoai,bs1_0.so_nam_kinh_nghiem,bs1_0.trang_thai,bs1_0.vai_tro from bacsi bs1_0 where bs1_0.email=?
+Hibernate: select ck1_0.id,ck1_0.doan_gioi_thieu,ck1_0.hinh_anh,ck1_0.loi_ket,ck1_0.ma_khoa,ck1_0.mo_ta,ck1_0.phu_de_banner,ck1_0.ten_chuyen_khoa_cu,ck1_0.ten_chuyen_khoa,ck1_0.tieu_de_hang_muc from chuyenkhoa ck1_0 where ck1_0.id=?
+Hibernate: select bs1_0.id,bs1_0.anh,bs1_0.chuyen_khoa_id,bs1_0.email,bs1_0.gia_kham,bs1_0.ho_ten,bs1_0.hoc_vi,bs1_0.mat_khau,bs1_0.mo_ta,bs1_0.ngay_tao,bs1_0.so_dien_thoai,bs1_0.so_nam_kinh_nghiem,bs1_0.trang_thai,bs1_0.vai_tro from bacsi bs1_0 where bs1_0.email=?
+Hibernate: select ck1_0.id,ck1_0.doan_gioi_thieu,ck1_0.hinh_anh,ck1_0.loi_ket,ck1_0.ma_khoa,ck1_0.mo_ta,ck1_0.phu_de_banner,ck1_0.ten_chuyen_khoa_cu,ck1_0.ten_chuyen_khoa,ck1_0.tieu_de_hang_muc from chuyenkhoa ck1_0 where ck1_0.id=?
+Hibernate: select bs1_0.id,bs1_0.anh,bs1_0.chuyen_khoa_id,bs1_0.email,bs1_0.gia_kham,bs1_0.ho_ten,bs1_0.hoc_vi,bs1_0.mat_khau,bs1_0.mo_ta,bs1_0.ngay_tao,bs1_0.so_dien_thoai,bs1_0.so_nam_kinh_nghiem,bs1_0.trang_thai,bs1_0.vai_tro from bacsi bs1_0 where bs1_0.email=?
+Hibernate: select ck1_0.id,ck1_0.doan_gioi_thieu,ck1_0.hinh_anh,ck1_0.loi_ket,ck1_0.ma_khoa,ck1_0.mo_ta,ck1_0.phu_de_banner,ck1_0.ten_chuyen_khoa_cu,ck1_0.ten_chuyen_khoa,ck1_0.tieu_de_hang_muc from chuyenkhoa ck1_0 where ck1_0.id=?
+Hibernate: select bs1_0.id,bs1_0.anh,bs1_0.chuyen_khoa_id,bs1_0.email,bs1_0.gia_kham,bs1_0.ho_ten,bs1_0.hoc_vi,bs1_0.mat_khau,bs1_0.mo_ta,bs1_0.ngay_tao,bs1_0.so_dien_thoai,bs1_0.so_nam_kinh_nghiem,bs1_0.trang_thai,bs1_0.vai_tro from bacsi bs1_0 where bs1_0.email=?
+Hibernate: select ck1_0.id,ck1_0.doan_gioi_thieu,ck1_0.hinh_anh,ck1_0.loi_ket,ck1_0.ma_khoa,ck1_0.mo_ta,ck1_0.phu_de_banner,ck1_0.ten_chuyen_khoa_cu,ck1_0.ten_chuyen_khoa,ck1_0.tieu_de_hang_muc from chuyenkhoa ck1_0 where ck1_0.id=?
+Hibernate: select bs1_0.id,bs1_0.anh,bs1_0.chuyen_khoa_id,bs1_0.email,bs1_0.gia_kham,bs1_0.ho_ten,bs1_0.hoc_vi,bs1_0.mat_khau,bs1_0.mo_ta,bs1_0.ngay_tao,bs1_0.so_dien_thoai,bs1_0.so_nam_kinh_nghiem,bs1_0.trang_thai,bs1_0.vai_tro from bacsi bs1_0 where bs1_0.email=?
+Hibernate: select ck1_0.id,ck1_0.doan_gioi_thieu,ck1_0.hinh_anh,ck1_0.loi_ket,ck1_0.ma_khoa,ck1_0.mo_ta,ck1_0.phu_de_banner,ck1_0.ten_chuyen_khoa_cu,ck1_0.ten_chuyen_khoa,ck1_0.tieu_de_hang_muc from chuyenkhoa ck1_0 where ck1_0.id=?
+Hibernate: select bs1_0.id,bs1_0.anh,bs1_0.chuyen_khoa_id,bs1_0.email,bs1_0.gia_kham,bs1_0.ho_ten,bs1_0.hoc_vi,bs1_0.mat_khau,bs1_0.mo_ta,bs1_0.ngay_tao,bs1_0.so_dien_thoai,bs1_0.so_nam_kinh_nghiem,bs1_0.trang_thai,bs1_0.vai_tro from bacsi bs1_0 where bs1_0.email=?
+Hibernate: select ck1_0.id,ck1_0.doan_gioi_thieu,ck1_0.hinh_anh,ck1_0.loi_ket,ck1_0.ma_khoa,ck1_0.mo_ta,ck1_0.phu_de_banner,ck1_0.ten_chuyen_khoa_cu,ck1_0.ten_chuyen_khoa,ck1_0.tieu_de_hang_muc from chuyenkhoa ck1_0 where ck1_0.id=?
+Hibernate: select bs1_0.id,bs1_0.anh,bs1_0.chuyen_khoa_id,bs1_0.email,bs1_0.gia_kham,bs1_0.ho_ten,bs1_0.hoc_vi,bs1_0.mat_khau,bs1_0.mo_ta,bs1_0.ngay_tao,bs1_0.so_dien_thoai,bs1_0.so_nam_kinh_nghiem,bs1_0.trang_thai,bs1_0.vai_tro from bacsi bs1_0 where bs1_0.email=?
+Hibernate: select ck1_0.id,ck1_0.doan_gioi_thieu,ck1_0.hinh_anh,ck1_0.loi_ket,ck1_0.ma_khoa,ck1_0.mo_ta,ck1_0.phu_de_banner,ck1_0.ten_chuyen_khoa_cu,ck1_0.ten_chuyen_khoa,ck1_0.tieu_de_hang_muc from chuyenkhoa ck1_0 where ck1_0.id=?
+Hibernate: select bs1_0.id,bs1_0.anh,bs1_0.chuyen_khoa_id,bs1_0.email,bs1_0.gia_kham,bs1_0.ho_ten,bs1_0.hoc_vi,bs1_0.mat_khau,bs1_0.mo_ta,bs1_0.ngay_tao,bs1_0.so_dien_thoai,bs1_0.so_nam_kinh_nghiem,bs1_0.trang_thai,bs1_0.vai_tro from bacsi bs1_0 where bs1_0.email=?
+Hibernate: select ck1_0.id,ck1_0.doan_gioi_thieu,ck1_0.hinh_anh,ck1_0.loi_ket,ck1_0.ma_khoa,ck1_0.mo_ta,ck1_0.phu_de_banner,ck1_0.ten_chuyen_khoa_cu,ck1_0.ten_chuyen_khoa,ck1_0.tieu_de_hang_muc from chuyenkhoa ck1_0 where ck1_0.id=?
+Hibernate: select bs1_0.id,bs1_0.anh,bs1_0.chuyen_khoa_id,bs1_0.email,bs1_0.gia_kham,bs1_0.ho_ten,bs1_0.hoc_vi,bs1_0.mat_khau,bs1_0.mo_ta,bs1_0.ngay_tao,bs1_0.so_dien_thoai,bs1_0.so_nam_kinh_nghiem,bs1_0.trang_thai,bs1_0.vai_tro from bacsi bs1_0 where bs1_0.email=?
+Hibernate: select ck1_0.id,ck1_0.doan_gioi_thieu,ck1_0.hinh_anh,ck1_0.loi_ket,ck1_0.ma_khoa,ck1_0.mo_ta,ck1_0.phu_de_banner,ck1_0.ten_chuyen_khoa_cu,ck1_0.ten_chuyen_khoa,ck1_0.tieu_de_hang_muc from chuyenkhoa ck1_0 where ck1_0.id=?
+>>> ?Ã L?U THÀNH CÔNG 0 BÁC S? VÀO CSDL!
+2026-08-09T03:07:46.743+07:00  INFO 11140 --- [nio-8085-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-08-09T03:07:46.743+07:00  INFO 11140 --- [nio-8085-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-08-09T03:07:46.767+07:00  INFO 11140 --- [nio-8085-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 24 ms
+Hibernate: select ck1_0.id,ck1_0.doan_gioi_thieu,ck1_0.hinh_anh,ck1_0.loi_ket,ck1_0.ma_khoa,ck1_0.mo_ta,ck1_0.phu_de_banner,ck1_0.ten_chuyen_khoa_cu,ck1_0.ten_chuyen_khoa,ck1_0.tieu_de_hang_muc from chuyenkhoa ck1_0 where ck1_0.id=?
+Hibernate: insert into lichkham (bac_si_id,benh_nhan_id,chan_doan,chuyen_khoa_id,don_thuoc,email,ghi_chu,ghi_chu_bac_si,gio_bat_dau,gio_ket_thuc,gio_kham,ho_ten_benh_nhan,lich_lam_viec_id,ly_do_doi,ly_do_huy,ngay_dat,ngay_kham,ngay_tai_kham,ngay_tao,nguoi_dung_id,so_dien_thoai,ten_bac_si,ten_benh_nhan,tien_su_benh,trang_thai,trieu_chung) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+Hibernate: select ck1_0.id,ck1_0.doan_gioi_thieu,ck1_0.hinh_anh,ck1_0.loi_ket,ck1_0.ma_khoa,ck1_0.mo_ta,ck1_0.phu_de_banner,ck1_0.ten_chuyen_khoa_cu,ck1_0.ten_chuyen_khoa,ck1_0.tieu_de_hang_muc from chuyenkhoa ck1_0 where ck1_0.id=?
+Hibernate: insert into lichkham (bac_si_id,benh_nhan_id,chan_doan,chuyen_khoa_id,don_thuoc,email,ghi_chu,ghi_chu_bac_si,gio_bat_dau,gio_ket_thuc,gio_kham,ho_ten_benh_nhan,lich_lam_viec_id,ly_do_doi,ly_do_huy,ngay_dat,ngay_kham,ngay_tai_kham,ngay_tao,nguoi_dung_id,so_dien_thoai,ten_bac_si,ten_benh_nhan,tien_su_benh,trang_thai,trieu_chung) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  08:41 min
+[INFO] Finished at: 2026-08-09T03:15:25+07:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.springframework.boot:spring-boot-maven-plugin:4.1.0:run (default-cli) on project booking: Process terminated with exit code: -1 -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoExecutionException

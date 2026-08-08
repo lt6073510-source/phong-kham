@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Configuration
 public class DataInitializer {
@@ -158,10 +159,10 @@ public class DataInitializer {
                 System.out.println(">>> ĐÃ LƯU THÀNH CÔNG " + listKhoa.size() + " CHUYÊN KHOA VÀO CSDL!");
             }
 
+// ==========================================
+            // 2. KHỞI TẠO DANH SÁCH BÁC SĨ (BỔ SUNG EMAIL CHƯA TỒN TẠI)
             // ==========================================
-            // 2. KHỞI TẠO DANH SÁCH BÁC SĨ (NẾU TRỐNG)
-            // ==========================================
-            if (countBacSi == 0) {
+            {
                 List<ChuyenKhoa> dsKhoa = chuyenKhoaRepo.findAll();
 
                 if (dsKhoa.isEmpty()) {
@@ -200,12 +201,25 @@ public class DataInitializer {
                 ds.add(new BacSiData("BS.CKI", "Trịnh Bảo Ngọc", "Khoa Răng-Hàm-Mặt", 7, 200000, "/bs15.jpg"));
                 ds.add(new BacSiData("BS", "Bùi Anh Tuấn", "Khoa Răng-Hàm-Mặt", 4, 150000, "/bs16.jpg"));
 
-                long startId = 12345678L;
+long startId = 12345678L;
                 List<BacSi> listBacSi = new ArrayList<>();
 
-                for (int i = 0; i < ds.size(); i++) {
+for (int i = 0; i < ds.size(); i++) {
                     BacSiData data = ds.get(i);
                     String id8Digits = String.valueOf(startId + i);
+                    String email = "bs" + id8Digits + "@phongkham.com";
+
+                    // NẾU EMAIL ĐÃ TỒN TẠI:
+                    // Kiểm tra nếu mật khẩu đang lưu dạng THÔ (không phải BCrypt) -> mã hóa lại BCrypt để đồng bộ
+                    Optional<BacSi> existing = bacSiRepo.findByEmail(email);
+                    if (existing.isPresent()) {
+                        String storedPw = existing.get().getMatKhau();
+                        if (storedPw != null && !storedPw.startsWith("$2a$") && !storedPw.startsWith("$2b$") && !storedPw.startsWith("$2y$")) {
+                            existing.get().setMatKhau(passwordEncoder.encode(storedPw));
+                            bacSiRepo.save(existing.get());
+                        }
+                        continue;
+                    }
 
                     ChuyenKhoa ck = dsKhoa.stream()
                             .filter(k -> k.getTenChuyenKhoa() != null && 
@@ -216,7 +230,7 @@ public class DataInitializer {
 
                     BacSi bacSi = new BacSi();
                     bacSi.setHoTen(data.hoTen);
-                    bacSi.setEmail("bs" + id8Digits + "@phongkham.com");
+                    bacSi.setEmail(email);
                     
                     // SỬA TẠI ĐÂY: Mã hóa mật khẩu trước khi lưu vào CSDL
                     bacSi.setMatKhau(passwordEncoder.encode(id8Digits));

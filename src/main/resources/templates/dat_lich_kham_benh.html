@@ -209,7 +209,7 @@
                 if (!selectedKhoaId) return;
 
                 // Gọi API backend lấy danh sách Bác sĩ thuộc Chuyên khoa vừa chọn
-                fetch(`/api/bac-si/by-khoa?khoaId=${selectedKhoaId}`)
+fetch(`/api/bac_si/by-khoa?khoaId=${selectedKhoaId}`)
                     .then(response => {
                         if (!response.ok) {
                             throw new Error('Lỗi truy xuất dữ liệu!');
@@ -267,21 +267,21 @@
                     headers: { 'Accept': 'application/json' },
                     body: data
                 })
-                .then(async res => {
+.then(async res => {
                     const json = await res.json().catch(() => ({ success: false, message: 'Lỗi phản hồi từ server' }));
                     if (res.ok && json.success) {
+                        // CHỈ hiện modal thành công khi server thực sự lưu được lịch
                         successMessageEl.textContent = json.message || 'Chúc mừng bạn đã đặt lịch thành công!';
                         successModal.show();
                         form.reset();
                     } else {
-                        successMessageEl.textContent = json.message || 'Không thể đặt lịch, vui lòng thử lại.';
-                        successModal.show();
+                        // THẤT BẠI: hiện thông báo lỗi rõ ràng, không ghi nhận là thành công
+                        alert('ĐẶT LỊCH THẤT BẠI!\n\n' + (json.message || 'Không thể đặt lịch, vui lòng thử lại.'));
                     }
                 })
                 .catch(err => {
                     console.error(err);
-                    successMessageEl.textContent = 'Lỗi kết nối tới server. Vui lòng thử lại.';
-                    successModal.show();
+                    alert('LỖI KẾT NỐI SERVER!\n\nKhông thể đặt lịch, vui lòng thử lại.');
                 })
                 .finally(() => {
                     submitBtn.disabled = false;

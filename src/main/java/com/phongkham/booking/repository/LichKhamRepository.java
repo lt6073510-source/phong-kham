@@ -18,8 +18,8 @@ public interface LichKhamRepository extends JpaRepository<LichKham, Integer> {
     // 3. Lọc lịch khám theo Bác sĩ ID và Trạng thái
     List<LichKham> findByBacSi_IdAndTrangThai(Integer bacSiId, String trangThai);
 
-    // 4. Tìm lịch khám theo Bệnh nhân ID
-    List<LichKham> findByBenhNhanId(Integer benhNhanId);
+// 4. Tìm lịch khám theo Bệnh nhân ID (Truy vấn qua đối tượng benhNhan.id)
+    List<LichKham> findByBenhNhan_Id(Long benhNhanId);
 
     // 5. Tìm lịch khám theo Email
     List<LichKham> findByEmail(String email);
@@ -27,7 +27,7 @@ public interface LichKhamRepository extends JpaRepository<LichKham, Integer> {
     // 6. Tìm lịch khám theo SĐT
     List<LichKham> findBySoDienThoai(String soDienThoai);
 
-    // 7. Đếm số lượng theo Trạng thái của riêng Bác sĩ
+// 7. Đếm số lượng theo Trạng thái của riêng Bác sĩ
     long countByBacSi_IdAndTrangThai(Integer bacSiId, String trangThai);
 
     // 8. Đếm số lượng theo Trạng thái chung
@@ -35,4 +35,13 @@ public interface LichKhamRepository extends JpaRepository<LichKham, Integer> {
 
     // 9. Lấy danh sách lịch tái khám của Bác sĩ (Kiểm tra khác null và không rỗng)
     List<LichKham> findByBacSi_IdAndNgayTaiKhamIsNotNullAndNgayTaiKhamNot(Integer bacSiId, String emptyStr);
+
+    // 10. Đếm số lượng theo Bác sĩ + Ngày khám + Trạng thái (dành cho "Tổng quan hôm nay")
+    long countByBacSi_IdAndNgayKhamAndTrangThai(Integer bacSiId, String ngayKham, String trangThai);
+
+    // 11. Lấy danh sách lịch của Bác sĩ theo đúng ngày khám (sắp theo ID giảm dần)
+    List<LichKham> findByBacSi_IdAndNgayKhamOrderByIdDesc(Integer bacSiId, String ngayKham);
+
+    // 12. Lấy danh sách lịch theo trạng thái và có ngayTaiKham khác null
+    List<LichKham> findByTrangThaiAndNgayTaiKhamIsNotNull(String trangThai);
 }

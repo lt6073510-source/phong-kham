@@ -2,8 +2,10 @@ package com.phongkham.booking.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 @Entity
 @Table(name = "lichkham")
@@ -14,12 +16,12 @@ public class LichKham {
     private Integer id;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "benh_nhan_id")
+    @JoinColumn(name = "benh_nhan_id", nullable = true)
     @JsonIgnoreProperties({"matKhau", "lichKhams", "dsLichKham"})
     private NguoiDungBenhNhan benhNhan;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "bac_si_id")
+    @JoinColumn(name = "bac_si_id", nullable = true)
     @JsonIgnoreProperties({"matKhau", "lichKhams", "dsLichKham"})
     private BacSi bacSi;
 
@@ -168,8 +170,22 @@ public class LichKham {
     public String getLyDoDoi() { return lyDoDoi; }
     public void setLyDoDoi(String lyDoDoi) { this.lyDoDoi = lyDoDoi; }
 
-    public String getNgayTaiKham() { return ngayTaiKham; }
+public String getNgayTaiKham() { return ngayTaiKham; }
     public void setNgayTaiKham(String ngayTaiKham) { this.ngayTaiKham = ngayTaiKham; }
+
+    // Số ngày còn lại tính đến ngày tái khám (tính động, không lưu DB)
+    // -1: không có ngày hoặc lỗi; >=0: còn X ngày; 0: hôm nay; <0: đã quá lịch
+    public long getSoNgayConLai() {
+        if (ngayTaiKham == null || ngayTaiKham.isBlank()) {
+            return -1;
+        }
+        try {
+            LocalDate ngayTaiKhamDate = LocalDate.parse(ngayTaiKham.trim());
+            return ChronoUnit.DAYS.between(LocalDate.now(), ngayTaiKhamDate);
+        } catch (Exception e) {
+            return -1;
+        }
+    }
 
     public LocalDateTime getNgayTao() { return ngayTao; }
     public void setNgayTao(LocalDateTime ngayTao) { this.ngayTao = ngayTao; }
