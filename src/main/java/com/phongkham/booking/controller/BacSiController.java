@@ -2,6 +2,8 @@ package com.phongkham.booking.controller;
 
 import com.phongkham.booking.entity.BacSi;
 import com.phongkham.booking.entity.LichKham;
+import com.phongkham.booking.entity.NguoiDungBenhNhan;
+import com.phongkham.booking.repository.KhoNguoiDungBenhNhan;
 import com.phongkham.booking.service.BacSiService;
 import com.phongkham.booking.service.LichKhamService;
 import jakarta.servlet.http.HttpSession;
@@ -17,12 +19,15 @@ import java.util.Optional;
 @Controller
 public class BacSiController {
 
-    private final BacSiService bacSiService;
+private final BacSiService bacSiService;
     private final LichKhamService lichKhamService;
+    private final KhoNguoiDungBenhNhan khoNguoiDungBenhNhan;
 
-    public BacSiController(BacSiService bacSiService, LichKhamService lichKhamService) {
+    public BacSiController(BacSiService bacSiService, LichKhamService lichKhamService,
+                           KhoNguoiDungBenhNhan khoNguoiDungBenhNhan) {
         this.bacSiService = bacSiService;
         this.lichKhamService = lichKhamService;
+        this.khoNguoiDungBenhNhan = khoNguoiDungBenhNhan;
     }
 
     // Hàm tiện ích lấy email Bác sĩ an toàn từ Session
@@ -120,7 +125,8 @@ public class BacSiController {
 
 // 2. Quản lý Hồ sơ bệnh án
     @GetMapping({"/bac_si/ho_so_benh_an", "/bac_si/ho-so-benh-an", "/bac_si/chi_tiet_ho_so", "/bac_si/chi-tiet-ho-so"})
-    public String trangHoSoBenhAn(@RequestParam(value = "patientId", required = false) Long patientId,
+public String trangHoSoBenhAn(@RequestParam(value = "patientId", required = false) Long patientId,
+                                  @RequestParam(value = "patientKey", required = false) String patientKey,
                                   @RequestParam(value = "keyword", required = false) String keyword,
                                   @RequestParam(value = "date", required = false) String date,
                                   HttpSession session, 
@@ -133,6 +139,7 @@ public class BacSiController {
         model.addAttribute("keyword", keyword);
         model.addAttribute("selectedDate", date);
         model.addAttribute("selectedPatientId", patientId);
+        model.addAttribute("selectedPatientKey", patientKey);
 
         // Xác định ID bác sĩ từ session
         Integer doctorId = null;
@@ -169,7 +176,7 @@ public class BacSiController {
         // Lọc theo ngày khám
         final String selectedDateStr = date;
 
-        // Gom nhóm theo bệnh nhân (email/SĐT) -> PatientSummary
+// Gom nhóm theo bệnh nhân (ưu tiên ID bệnh nhân, fallback email/SĐT/tên) -> PatientSummary
         java.util.LinkedHashMap<String, PatientSummary> patientMap = new java.util.LinkedHashMap<>();
         java.util.List<LichKham> allRecordsForPatient = new ArrayList<>();
 
@@ -177,7 +184,7 @@ public class BacSiController {
             String phone = lk.getSoDienThoai() != null ? lk.getSoDienThoai() : "";
             String name = lk.getHoTenBenhNhan() != null ? lk.getHoTenBenhNhan() : "Bệnh nhân";
             String email = lk.getEmail() != null ? lk.getEmail() : "";
-            String key = !phone.isBlank() ? phone : email;
+            String key = buildPatientKey(lk);
             if (key.isBlank()) key = name;
 
             // Filter theo keyword
@@ -191,18 +198,32 @@ public class BacSiController {
                 if (!ngay.equals(selectedDateStr)) continue;
             }
 
-            patientMap.putIfAbsent(key, new PatientSummary(key, name, phone, email, lk.getNgayKham()));
+String[] gtTuoi = layGioiTinhTuoi(lk);
+            patientMap.putIfAbsent(key, new PatientSummary(key, name, phone, email,
+                    gtTuoi[0], gtTuoi[1], lk.getNgayKham()));
             allRecordsForPatient.add(lk);
         }
 
         java.util.List<PatientSummary> patients = new ArrayList<>(patientMap.values());
         model.addAttribute("patients", patients);
 
-        // Xử lý bệnh nhân được chọn (patientId hoặc mặc định đầu tiên)
+// Xử lý bệnh nhân được chọn: ưu tiên patientKey (định danh duy nhất),
+        // fallback patientId (ID hash cũ) và cuối cùng là bệnh nhân đầu danh sách.
         LichKham selectedLK = null;
-        if (patientId != null) {
+        String selectedKey = (patientKey != null && !patientKey.isBlank()) ? patientKey : null;
+        if (selectedKey == null && patientId != null) {
+            // patientId cũ = hash của key -> tìm lịch có key.hashCode() trùng
             for (LichKham lk : allRecordsForPatient) {
-                if (lk.getId() != null && lk.getId().longValue() == patientId.longValue()) {
+                String k = buildPatientKey(lk);
+                if (k != null && ((long) (k.hashCode() & 0x7fffffff)) == patientId.longValue()) {
+                    selectedLK = lk;
+                    selectedKey = k;
+                    break;
+                }
+            }
+        } else if (selectedKey != null) {
+            for (LichKham lk : allRecordsForPatient) {
+                if (selectedKey.equals(buildPatientKey(lk))) {
                     selectedLK = lk;
                     break;
                 }
@@ -210,27 +231,27 @@ public class BacSiController {
         }
         if (selectedLK == null && !allRecordsForPatient.isEmpty()) {
             selectedLK = allRecordsForPatient.get(0);
+            selectedKey = buildPatientKey(selectedLK);
         }
 
-        if (selectedLK != null) {
+if (selectedLK != null) {
+            String[] gtTuoiSel = layGioiTinhTuoi(selectedLK);
+            String selKey = (selectedKey != null) ? selectedKey : buildPatientKey(selectedLK);
             PatientSummary sel = new PatientSummary(
-                    selectedLK.getSoDienThoai() != null ? selectedLK.getSoDienThoai() : "",
+                    selKey,
                     selectedLK.getHoTenBenhNhan() != null ? selectedLK.getHoTenBenhNhan() : "Bệnh nhân",
                     selectedLK.getSoDienThoai() != null ? selectedLK.getSoDienThoai() : "",
                     selectedLK.getEmail() != null ? selectedLK.getEmail() : "",
+                    gtTuoiSel[0], gtTuoiSel[1],
                     selectedLK.getNgayKham());
             model.addAttribute("selectedPatient", sel);
             model.addAttribute("selectedPatientId", sel.id);
+            model.addAttribute("selectedPatientKey", selKey);
 
-            // Lịch sử khám của bệnh nhân được chọn (theo SĐT/email)
-            String selPhone = selectedLK.getSoDienThoai() != null ? selectedLK.getSoDienThoai() : "";
-            String selEmail = selectedLK.getEmail() != null ? selectedLK.getEmail() : "";
+// Lịch sử khám của bệnh nhân được chọn (dùng key định danh bệnh nhân để khớp chính xác)
             java.util.List<MedicalRecordView> histories = new ArrayList<>();
             for (LichKham lk : allRecordsForPatient) {
-                boolean match = false;
-                if (!selPhone.isBlank() && selPhone.equals(lk.getSoDienThoai())) match = true;
-                else if (!selEmail.isBlank() && selEmail.equals(lk.getEmail())) match = true;
-                if (match) {
+                if (selKey != null && selKey.equals(buildPatientKey(lk))) {
                     histories.add(new MedicalRecordView(lk));
                 }
             }
@@ -276,9 +297,10 @@ List<com.phongkham.booking.entity.LichKham> reminders = new ArrayList<>();
         return "nhac_nho"; 
     }
 
-    // ===== DTO nội bộ phục vụ trang Hồ sơ bệnh án =====
+// ===== DTO nội bộ phục vụ trang Hồ sơ bệnh án =====
     public static class PatientSummary {
         public Long id;
+        public String key;
         public String fullName;
         public String code;
         public String phone;
@@ -287,16 +309,98 @@ List<com.phongkham.booking.entity.LichKham> reminders = new ArrayList<>();
         public String initials;
         public String lastVisitDate;
 
-        public PatientSummary(String key, String name, String phone, String email, String lastVisit) {
+public PatientSummary(String key, String name, String phone, String email, String gender,
+                              String age, String lastVisit) {
+            this.key = key;
             this.id = (long) (key.hashCode() & 0x7fffffff);
             this.fullName = name;
             this.code = "BN" + this.id;
             this.phone = phone;
-            this.gender = "Chưa rõ";
-            this.age = "";
+            this.gender = (gender == null || gender.isBlank()) ? "Chưa rõ" : gender;
+            this.age = (age == null || age.isBlank()) ? "" : age;
             this.initials = name != null && !name.isBlank() ? name.substring(0, 1).toUpperCase() : "BN";
             this.lastVisitDate = lastVisit;
         }
+    }
+
+// Xây key định danh duy nhất cho bệnh nhân: ưu tiên ID bệnh nhân, fallback email/SĐT
+    private String buildPatientKey(LichKham lk) {
+        if (lk == null) return "";
+        // 1. ID bệnh nhân (đã đăng nhập) — định danh chính xác nhất
+        if (lk.getBenhNhan() != null && lk.getBenhNhan().getId() != null) {
+            return "uid:" + lk.getBenhNhan().getId();
+        }
+        if (lk.getNguoiDungId() != null) {
+            return "uid:" + lk.getNguoiDungId();
+        }
+        // 2. Email (unique trong bảng tài khoản)
+        if (lk.getEmail() != null && !lk.getEmail().isBlank()) {
+            return "email:" + lk.getEmail().trim().toLowerCase();
+        }
+        // 3. SĐT (fallback, có thể trùng — chấp nhận để không mất dữ liệu)
+        if (lk.getSoDienThoai() != null && !lk.getSoDienThoai().isBlank()) {
+            return "sdt:" + lk.getSoDienThoai().trim();
+        }
+        // 4. Cuối cùng dùng tên (kèm id lịch để tránh gộp sai)
+        if (lk.getHoTenBenhNhan() != null && !lk.getHoTenBenhNhan().isBlank()) {
+            return "ten:" + lk.getHoTenBenhNhan().trim() + "-" + lk.getId();
+        }
+        return "";
+    }
+
+    // Tìm giới tính + tuổi từ lịch khám: ưu tiên đối tượng benhNhan đã gắn trong lịch
+    private String[] layGioiTinhTuoi(LichKham lk) {
+        if (lk == null) return new String[]{"Chưa rõ", ""};
+        // Ưu tiên bệnh nhân đã gắn trực tiếp trong lịch (chính xác 100%)
+        if (lk.getBenhNhan() != null && lk.getBenhNhan().getId() != null) {
+            Optional<NguoiDungBenhNhan> opt = khoNguoiDungBenhNhan.findById(lk.getBenhNhan().getId());
+            if (opt.isPresent()) {
+                return gioiTinhTuoiTuBenhNhan(opt.get());
+            }
+        }
+        if (lk.getNguoiDungId() != null) {
+            Optional<NguoiDungBenhNhan> opt = khoNguoiDungBenhNhan.findById(lk.getNguoiDungId());
+            if (opt.isPresent()) {
+                return gioiTinhTuoiTuBenhNhan(opt.get());
+            }
+        }
+        // Fallback: tra qua email (unique) trước, SĐT sau
+        if (lk.getEmail() != null && !lk.getEmail().isBlank()) {
+            Optional<NguoiDungBenhNhan> opt = khoNguoiDungBenhNhan.findByEmail(lk.getEmail().trim());
+            if (opt.isPresent()) {
+                return gioiTinhTuoiTuBenhNhan(opt.get());
+            }
+        }
+        if (lk.getSoDienThoai() != null && !lk.getSoDienThoai().isBlank()) {
+            Optional<NguoiDungBenhNhan> opt = khoNguoiDungBenhNhan.findFirstBySoDienThoai(lk.getSoDienThoai().trim());
+            if (opt.isPresent()) {
+                return gioiTinhTuoiTuBenhNhan(opt.get());
+            }
+        }
+        return new String[]{"Chưa rõ", ""};
+    }
+
+    // Trích giới tính + tuổi từ 1 đối tượng bệnh nhân
+    private String[] gioiTinhTuoiTuBenhNhan(NguoiDungBenhNhan bn) {
+        if (bn == null) return new String[]{"Chưa rõ", ""};
+        String gioiTinh = bn.getGioiTinh() != null ? bn.getGioiTinh() : "Chưa rõ";
+        String tuoi = bn.getTuoi() > 0 ? String.valueOf(bn.getTuoi()) : "";
+        return new String[]{gioiTinh, tuoi};
+    }
+
+    // Tìm giới tính + tuổi của bệnh nhân từ tài khoản đăng ký (NguoiDungBenhNhan) theo SĐT/email
+    private String[] layGioiTinhTuoi(String phone, String email) {
+        NguoiDungBenhNhan bn = null;
+if (phone != null && !phone.isBlank()) {
+            bn = khoNguoiDungBenhNhan.findFirstBySoDienThoai(phone.trim()).orElse(null);
+        }
+        if (bn == null && email != null && !email.isBlank()) {
+            bn = khoNguoiDungBenhNhan.findByEmail(email.trim()).orElse(null);
+        }
+        if (bn == null) return new String[]{"Chưa rõ", ""};
+        String gioiTinh = bn.getGioiTinh() != null ? bn.getGioiTinh() : "Chưa rõ";
+        String tuoi = bn.getTuoi() > 0 ? String.valueOf(bn.getTuoi()) : "";
+        return new String[]{gioiTinh, tuoi};
     }
 
     public static class MedicalRecordView {

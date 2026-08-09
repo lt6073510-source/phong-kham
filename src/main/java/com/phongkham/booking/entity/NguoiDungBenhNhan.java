@@ -1,7 +1,9 @@
 package com.phongkham.booking.entity;
 
 import jakarta.persistence.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Period;
 
 @Entity
 @Table(name = "nguoidungbenhnhan")
@@ -31,8 +33,16 @@ public class NguoiDungBenhNhan {
     @Column(name = "trang_thai")
     private String trangThai = "HOAT_DONG";
 
-    @Column(name = "ngay_tao", updatable = false)
+@Column(name = "ngay_tao", updatable = false)
     private LocalDateTime ngayTao;
+
+    // Ngày sinh bệnh nhân (dùng để tính tuổi tự động)
+    @Column(name = "ngay_sinh")
+    private LocalDate ngaySinh;
+
+    // Giới tính (Ví dụ: "Nam", "Nữ", "Khác")
+    @Column(name = "gioi_tinh")
+    private String gioiTinh;
 
     // Tự động gán thời gian tạo khi thêm mới record
     @PrePersist
@@ -123,7 +133,31 @@ public class NguoiDungBenhNhan {
         return ngayTao;
     }
 
-    public void setNgayTao(LocalDateTime ngayTao) {
+public void setNgayTao(LocalDateTime ngayTao) {
         this.ngayTao = ngayTao;
+    }
+
+    public LocalDate getNgaySinh() {
+        return ngaySinh;
+    }
+
+    public void setNgaySinh(LocalDate ngaySinh) {
+        this.ngaySinh = ngaySinh;
+    }
+
+    public String getGioiTinh() {
+        return gioiTinh;
+    }
+
+    public void setGioiTinh(String gioiTinh) {
+        this.gioiTinh = gioiTinh;
+    }
+
+    // Tính tuổi tự động từ ngày sinh (không lưu tuổi trong DB)
+    public int getTuoi() {
+        if (ngaySinh == null) {
+            return 0;
+        }
+        return Period.between(ngaySinh, LocalDate.now()).getYears();
     }
 }

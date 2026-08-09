@@ -14,5 +14,8 @@ public interface ThongBaoRepository extends JpaRepository<ThongBao, Long> {
 
     // Đếm số thông báo chưa đọc của người dùng
     long countByNguoiDungIdAndDaDocFalse(Long nguoiDungId);
+
+    // Kiểm tra đã có thông báo chưa đọc cùng loại cho một lịch khám (tránh tạo lặp thông báo TAI_KHAM)
+    boolean existsByNguoiDungIdAndLichKhamIdAndLoai(Long nguoiDungId, Integer lichKhamId, String loai);
 }
 

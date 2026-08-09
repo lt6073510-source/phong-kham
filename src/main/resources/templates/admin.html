@@ -162,7 +162,7 @@
                         </div>
                     </div>
 
-                    <div class="col-md-4">
+<div class="col-md-4">
                         <div class="card stat-card p-3 bg-white shadow-sm border-0">
                             <div class="d-flex align-items-center gap-3">
                                 <div class="stat-icon bg-info bg-opacity-10 text-info p-3 rounded">
@@ -171,6 +171,49 @@
                                 <div>
                                     <small class="text-muted fw-bold">Tổng số Bác sĩ</small>
                                     <h3 class="fw-bold mb-0" th:text="${dsBacSi != null ? #lists.size(dsBacSi) : 0}">0</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== 2 BIỂU ĐỒ TỔNG QUAN (NẰM NGANG) ===== -->
+                <div class="row g-4 mb-4">
+                    <!-- Biểu đồ tròn: Trạng thái lịch khám -->
+                    <div class="col-xl-6">
+                        <div class="card shadow-sm border-0 h-100">
+                            <div class="card-header bg-white py-3">
+                                <h6 class="mb-0 fw-bold text-dark"><i class="bi bi-pie-chart me-2 text-primary"></i>Trạng Thái Lịch Khám</h6>
+                            </div>
+                            <div class="card-body d-flex align-items-center justify-content-center" style="height: 380px;">
+                                <div class="text-center w-100">
+                                    <div th:if="${#lists.isEmpty(dsLichKham)}" class="text-muted py-5">
+                                        <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                                        Chưa có dữ liệu lịch khám
+                                    </div>
+<div th:if="${!#lists.isEmpty(dsLichKham)}" style="position: relative; width: 100%; max-width: 320px; margin: 0 auto;">
+                                        <canvas id="chartTrangThai" style="max-height: 320px;"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Biểu đồ cột: Lịch khám theo chuyên khoa -->
+                    <div class="col-xl-6">
+                        <div class="card shadow-sm border-0 h-100">
+                            <div class="card-header bg-white py-3">
+                                <h6 class="mb-0 fw-bold text-dark"><i class="bi bi-bar-chart me-2 text-success"></i>Lịch Khám Theo Chuyên Khoa</h6>
+                            </div>
+                            <div class="card-body d-flex align-items-center justify-content-center" style="height: 380px;">
+                                <div class="text-center w-100">
+                                    <div th:if="${#lists.isEmpty(dsLichKham)}" class="text-muted py-5">
+                                        <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                                        Chưa có dữ liệu lịch khám
+                                    </div>
+                                    <div th:if="${!#lists.isEmpty(dsLichKham)}" style="width: 100%;">
+                                        <canvas id="chartChuyenKhoa" style="max-height: 320px;"></canvas>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -788,5 +831,112 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- ===== SCRIPT VẼ 2 BIỂU ĐỒ DASHBOARD (DỮ LIỆU ĐỘNG TỪ MODEL) ===== -->
+<script th:inline="javascript">
+document.addEventListener("DOMContentLoaded", function () {
+    var hasData = /*[[${!#lists.isEmpty(dsLichKham)}]]*/ false;
+
+    if (!hasData) {
+        return; // Không có dữ liệu -> hiển thị thông báo (đã xử lý ở HTML)
+    }
+
+    // ---------- 1. DOUGHNUT CHART: TRẠNG THÁI LỊCH KHÁM ----------
+    var thongKeTrangThai = /*[[${thongKeTrangThai}]]*/ {};
+    var labelsTT = ['Chờ xác nhận', 'Đã xác nhận', 'Hoàn thành', 'Đã hủy'];
+    var dataTT = [
+        thongKeTrangThai['choXacNhan'] || 0,
+        thongKeTrangThai['daXacNhan'] || 0,
+        thongKeTrangThai['hoanThanh'] || 0,
+        thongKeTrangThai['daHuy'] || 0
+    ];
+    var colorsTT = ['#ffc107', '#0d6efd', '#198754', '#dc3545'];
+
+    var ctxTT = document.getElementById('chartTrangThai');
+    if (ctxTT) {
+        new Chart(ctxTT, {
+            type: 'doughnut',
+            data: {
+                labels: labelsTT,
+                datasets: [{
+                    data: dataTT,
+                    backgroundColor: colorsTT,
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
+                }]
+            },
+options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '65%',
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: { usePointStyle: true, padding: 12, font: { size: 12 } }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                var total = dataTT.reduce(function (a, b) { return a + b; }, 0);
+                                var pct = total > 0 ? Math.round((context.parsed / total) * 100) : 0;
+                                return ' ' + context.label + ': ' + context.parsed + ' lịch (' + pct + '%)';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // ---------- 2. BAR CHART: LỊCH KHÁM THEO CHUYÊN KHOA ----------
+    var thongKeChuyenKhoa = /*[[${thongKeChuyenKhoa}]]*/ {};
+    var labelsCK = Object.keys(thongKeChuyenKhoa);
+    var dataCK = Object.values(thongKeChuyenKhoa);
+
+    var ctxCK = document.getElementById('chartChuyenKhoa');
+    if (ctxCK) {
+new Chart(ctxCK, {
+            type: 'bar',
+            data: {
+                labels: labelsCK,
+                datasets: [{
+                    label: 'Số lịch khám',
+                    data: dataCK,
+                    backgroundColor: 'rgba(13, 110, 253, 0.7)',
+                    borderColor: 'rgba(13, 110, 253, 1)',
+                    borderWidth: 1,
+                    borderRadius: 6
+                }]
+            },
+options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                return ' ' + context.parsed.y + ' lịch';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { precision: 0 },
+                        grid: { color: 'rgba(0,0,0,0.05)' }
+                    },
+                    x: {
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
 </body>
 </html>

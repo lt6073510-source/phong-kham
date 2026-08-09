@@ -86,7 +86,7 @@
                             <div class="avatar-circle bg-primary fs-5" style="width: 50px; height: 50px;" th:text="${selectedPatient.initials != null ? selectedPatient.initials : 'BN'}">BN</div>
                             <div>
                                 <h5 class="fw-bold mb-0 text-dark" th:text="${selectedPatient.fullName}">Tên Bệnh Nhân</h5>
-                                <small class="text-muted" th:text="${(selectedPatient.gender != null ? selectedPatient.gender : 'Nam/Nữ') + ' - ' + (selectedPatient.age != null ? selectedPatient.age : '0') + ' tuổi | SĐT: ' + (selectedPatient.phone != null ? selectedPatient.phone : '-')}">Thông tin BN</small>
+<small class="text-muted" th:text="${(selectedPatient.gender != null ? selectedPatient.gender : 'Nam/Nữ') + (selectedPatient.age != null && selectedPatient.age != '' ? ' - ' + selectedPatient.age + ' tuổi' : '') + ' | SĐT: ' + (selectedPatient.phone != null ? selectedPatient.phone : '-')}">Thông tin BN</small>
                             </div>
                         </div>
                         <div class="d-flex align-items-center gap-2">

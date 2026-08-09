@@ -9,6 +9,7 @@ import com.phongkham.booking.repository.KhoNguoiDungBenhNhan;
 import com.phongkham.booking.service.BacSiService;
 import com.phongkham.booking.service.ChuyenKhoaService;
 import com.phongkham.booking.service.LichKhamService;
+import com.phongkham.booking.service.ThongBaoService;
 
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.HttpServletRequest;
@@ -44,11 +45,14 @@ public class WebController {
     @Autowired
     private BacSiRepository khoBacSi;
 
-    @Autowired
+@Autowired
     private LichKhamService lichKhamService;
 
     @Autowired
     private ChuyenKhoaService chuyenKhoaService;
+
+    @Autowired
+    private ThongBaoService thongBaoService;
 
 @Autowired
     private BacSiService bacSiService;
@@ -69,10 +73,11 @@ public class WebController {
     // =========================================================
     // 1. CÁC TRANG GIAO DIỆN CHUNG & TĨNH
     // =========================================================
-    @GetMapping("/")
-    public String index(Model model) {
+@GetMapping("/")
+    public String index(HttpSession session, Model model) {
         List<ChuyenKhoa> dsChuyenKhoa = chuyenKhoaService.getAllChuyenKhoa();
         model.addAttribute("danhSachChuyenKhoa", dsChuyenKhoa);
+        themThongBaoVaoModel(session, model);
         return "index";
     }
 
@@ -167,12 +172,14 @@ newSession.setAttribute("userLuuSinh", bs);
         return "dang_ky";
     }
 
-    @PostMapping({"/dang-ky", "/dang_ky"})
+@PostMapping({"/dang-ky", "/dang_ky"})
     public String xuLyDangKy(
             @RequestParam String hoTen,
             @RequestParam String email,
             @RequestParam String soDienThoai,
             @RequestParam String matKhau,
+            @RequestParam(name = "gioiTinh", required = false) String gioiTinh,
+            @RequestParam(name = "ngaySinh", required = false) String ngaySinh,
             RedirectAttributes redirectAttributes) {
 
         if (khoNguoiDungBenhNhan.existsByEmail(email)) {
@@ -185,6 +192,16 @@ newSession.setAttribute("userLuuSinh", bs);
         user.setEmail(email);
         user.setSoDienThoai(soDienThoai);
         user.setMatKhau(matKhau);
+        if (gioiTinh != null && !gioiTinh.isBlank()) {
+            user.setGioiTinh(gioiTinh.trim());
+        }
+        if (ngaySinh != null && !ngaySinh.isBlank()) {
+            try {
+                user.setNgaySinh(java.time.LocalDate.parse(ngaySinh.trim()));
+            } catch (Exception ignore) {
+                // Bỏ qua nếu định dạng sai
+            }
+        }
         user.setNgayTao(LocalDateTime.now());
 
         khoNguoiDungBenhNhan.save(user);
@@ -446,11 +463,39 @@ List<LichKham> dsLichKham = new ArrayList<>();
             }
         }
 
-        List<LichKham> danhSachLich = new ArrayList<>(uniqueAppointments.values());
+List<LichKham> danhSachLich = new ArrayList<>(uniqueAppointments.values());
         model.addAttribute("dsLichKham", danhSachLich);
         model.addAttribute("danhSachLich", danhSachLich);
         model.addAttribute("userEmail", userEmail);
 
+        themThongBaoVaoModel(session, model);
+
         return "lich_su_dang_ky";
+    }
+
+    // Đổ danh sách thông báo + số thông báo chưa đọc cho bệnh nhân đã đăng nhập
+    private void themThongBaoVaoModel(HttpSession session, Model model) {
+        Object roleObj = session.getAttribute("userRole");
+        // Chỉ bệnh nhân mới cần chuông thông báo
+        boolean isBenhNhan = roleObj != null && "BENH_NHAN".equalsIgnoreCase(roleObj.toString());
+        if (!isBenhNhan) {
+            model.addAttribute("notifications", new ArrayList<>());
+            model.addAttribute("notificationCount", 0L);
+            return;
+        }
+        Object userIdObj = session.getAttribute("userId");
+        if (userIdObj == null) {
+            model.addAttribute("notifications", new ArrayList<>());
+            model.addAttribute("notificationCount", 0L);
+            return;
+        }
+        try {
+            Long userId = Long.valueOf(userIdObj.toString());
+            model.addAttribute("notifications", thongBaoService.getThongBaoByNguoiDung(userId));
+            model.addAttribute("notificationCount", thongBaoService.countChuaDoc(userId));
+        } catch (Exception e) {
+            model.addAttribute("notifications", new ArrayList<>());
+            model.addAttribute("notificationCount", 0L);
+        }
     }
 }

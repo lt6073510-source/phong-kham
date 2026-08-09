@@ -13,6 +13,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.Optional;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/admin")
@@ -46,10 +49,48 @@ public class AdminViewController {
             return "redirect:/dang_nhap";
         }
 
-        model.addAttribute("dsChuyenKhoa", chuyenKhoaService.getAllChuyenKhoa());
+model.addAttribute("dsChuyenKhoa", chuyenKhoaService.getAllChuyenKhoa());
         model.addAttribute("dsBacSi", bacSiService.getAllBacSi());
-        model.addAttribute("dsLichKham", lichKhamService.getAllLichKham(null));
-        
+        List<LichKham> dsLichKham = lichKhamService.getAllLichKham(null);
+        model.addAttribute("dsLichKham", dsLichKham);
+
+        // === THỐNG KÊ BIỂU ĐỒ DASHBOARD ===
+        // 1. Biểu đồ tròn (Doughnut): Trạng thái lịch khám
+        Map<String, Long> thongKeTrangThai = lichKhamService.getThongKeTrangThai();
+
+// 2. Biểu đồ cột (Bar): Lịch khám theo chuyên khoa (dữ liệu động từ DB)
+        // Khởi tạo với TẤT CẢ chuyên khoa từ DB (mặc định 0) để hiển thị cả khoa chưa có lịch
+        Map<String, Long> thongKeChuyenKhoa = new LinkedHashMap<>();
+        Map<Long, String> mapTenKhoa = new HashMap<>();
+        for (ChuyenKhoa ck : chuyenKhoaService.getAllChuyenKhoa()) {
+            if (ck.getId() != null) {
+                mapTenKhoa.put(Long.valueOf(ck.getId()), ck.getTenChuyenKhoa());
+                thongKeChuyenKhoa.put(ck.getTenChuyenKhoa(), 0L);
+            }
+        }
+        if (dsLichKham != null) {
+            for (LichKham lk : dsLichKham) {
+                String tenKhoa = "Chưa phân khoa";
+                if (lk.getChuyenKhoaId() != null) {
+                    String ten = mapTenKhoa.get(lk.getChuyenKhoaId());
+                    if (ten != null) {
+                        tenKhoa = ten;
+                    } else {
+                        // Chuyên khoa không còn tồn tại trong DB -> gom vào "Chưa phân khoa"
+                        tenKhoa = "Chưa phân khoa";
+                    }
+                }
+                thongKeChuyenKhoa.merge(tenKhoa, 1L, Long::sum);
+            }
+        }
+        // Đảm bảo "Chưa phân khoa" luôn có trong danh sách nếu có lịch không phân khoa
+        if (thongKeChuyenKhoa.containsKey("Chưa phân khoa") && thongKeChuyenKhoa.get("Chưa phân khoa") == 0L) {
+            thongKeChuyenKhoa.remove("Chưa phân khoa");
+        }
+
+        model.addAttribute("thongKeTrangThai", thongKeTrangThai);
+        model.addAttribute("thongKeChuyenKhoa", thongKeChuyenKhoa);
+
         model.addAttribute("chuyenKhoaMoi", new ChuyenKhoa());
         model.addAttribute("bacSiMoi", new BacSi());
         return "admin";

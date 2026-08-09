@@ -22,6 +22,9 @@ public interface KhoNguoiDungBenhNhan extends JpaRepository<NguoiDungBenhNhan, L
     // 4. Đếm tổng số lượng Bệnh nhân đăng ký trong hệ thống (Dành cho Admin xem thống kê)
     long countByVaiTro(String vaiTro);
 
-    // 5. Tìm theo số điện thoại (Hỗ trợ tra cứu thông tin nhanh)
+// 5. Tìm theo số điện thoại (Hỗ trợ tra cứu thông tin nhanh)
     Optional<NguoiDungBenhNhan> findBySoDienThoai(String soDienThoai);
+
+    // 5a. Lấy 1 bệnh nhân đầu tiên theo SĐT (tránh lỗi NonUniqueResult khi có nhiều tài khoản trùng SĐT)
+    Optional<NguoiDungBenhNhan> findFirstBySoDienThoai(String soDienThoai);
 }

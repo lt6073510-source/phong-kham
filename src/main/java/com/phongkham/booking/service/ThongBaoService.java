@@ -53,4 +53,34 @@ public class ThongBaoService {
             }
         }
     }
+
+    // Tạo thông báo tái khám (TAI_KHAM) cho bệnh nhân nếu CHƯA tồn tại thông báo cùng loại cho lịch này.
+    // Hàm chạy trong job tự động -> tránh tạo lặp mỗi lần chạy.
+    public ThongBao taoThongBaoTaiKham(Long nguoiDungId, Integer lichKhamId, String ngayTaiKham, long soNgayConLai) {
+        if (nguoiDungId == null || lichKhamId == null) return null;
+        // Nếu đã có thông báo TAI_KHAM cho lịch này rồi thì bỏ qua (chống trùng)
+        boolean exists = thongBaoRepository.existsByNguoiDungIdAndLichKhamIdAndLoai(nguoiDungId, lichKhamId, "TAI_KHAM");
+        if (exists) return null;
+
+        String ngayDisplay = (ngayTaiKham == null || ngayTaiKham.isBlank()) ? "đã đặt" : ngayTaiKham;
+        String phanNgay;
+        if (soNgayConLai == 0) {
+            phanNgay = " hôm nay.";
+        } else if (soNgayConLai == 1) {
+            phanNgay = ". Còn 1 ngày nữa.";
+        } else {
+            phanNgay = ". Còn " + soNgayConLai + " ngày nữa.";
+        }
+
+        String noiDung = "Bạn có lịch tái khám vào ngày " + ngayDisplay + phanNgay
+                + " Vui lòng sắp xếp thời gian đến phòng khám.";
+
+        return taoThongBao(nguoiDungId, noiDung, "TAI_KHAM", lichKhamId);
+    }
+
+    // Kiểm tra đã tồn tại thông báo cùng loại cho lịch khám chưa (phục vụ chống trùng lặp)
+    public boolean daCoThongBao(Long nguoiDungId, Integer lichKhamId, String loai) {
+        if (nguoiDungId == null || lichKhamId == null) return false;
+        return thongBaoRepository.existsByNguoiDungIdAndLichKhamIdAndLoai(nguoiDungId, lichKhamId, loai);
+    }
 }
