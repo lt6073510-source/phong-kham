@@ -237,6 +237,13 @@
     },
     componentProps: {
       title: 'Trợ lý phòng khám An Tâm',
+    },
+    auth: {
+      type: 'token',
+      token: 'pat_YOUR_TOKEN_HERE', // Điền token pat_ của bạn vào đây
+      onRefreshToken: function () {
+        return 'pat_YOUR_TOKEN_HERE'
+      }
     }
   });
 </script>
