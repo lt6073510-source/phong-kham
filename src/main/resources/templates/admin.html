@@ -155,8 +155,8 @@
                                     <i class="bi bi-person-plus fs-3"></i>
                                 </div>
                                 <div>
-                                    <small class="text-muted fw-bold">Bệnh nhân</small>
-                                    <h3 class="fw-bold mb-0" th:text="${dsNguoiDung != null ? #lists.size(dsNguoiDung.?[vaiTro.name() == 'BENH_NHAN']) : 0}">0</h3>
+<small class="text-muted fw-bold">Bệnh nhân</small>
+                                    <h3 class="fw-bold mb-0" th:text="${dsNguoiDung != null ? #lists.size(dsNguoiDung) : 0}">0</h3>
                                 </div>
                             </div>
                         </div>
@@ -571,20 +571,23 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr th:each="nd : ${dsNguoiDung}" th:if="${nd.vaiTro != null and nd.vaiTro.name() == 'BENH_NHAN'}">
+<tr th:each="nd : ${dsNguoiDung}">
                                             <td class="ps-3" th:text="${nd.id}">1</td>
                                             <td th:text="${nd.hoTen}" class="fw-bold">Nguyễn Văn Bệnh Nhân</td>
                                             <td th:text="${nd.email}">patient@gmail.com</td>
                                             <td th:text="${nd.soDienThoai != null ? nd.soDienThoai : 'Chưa cập nhật'}">0912345678</td>
                                             <td class="text-center">
-                                                <a th:href="@{/admin/tai-khoan/doi-trang-thai/{id}(id=${nd.id})}" 
+<a th:href="@{/admin/tai-khoan/doi-trang-thai/{id}(id=${nd.id})}" 
                                                    class="btn btn-sm btn-light border me-1"
-                                                   th:classappend="${nd.trangThai != null and nd.trangThai.toString() == 'KHOA' ? 'text-success' : 'text-warning'}">
+                                                   th:classappend="${nd.trangThai != null and nd.trangThai.toString() == 'KHOA' ? 'text-success' : 'text-warning'}"
+                                                   th:attr="data-action=${nd.trangThai != null and nd.trangThai.toString() == 'KHOA' ? 'mở khóa' : 'khóa'}"
+                                                   onclick="return confirm('Bạn có chắc chắn muốn ' + this.getAttribute('data-action') + ' tài khoản bệnh nhân này không?');">
                                                     <span th:text="${nd.trangThai != null and nd.trangThai.toString() == 'KHOA' ? '🔓 mở' : '🔒 khóa'}"></span>
                                                 </a>
-                                                <a th:href="@{/admin/tai-khoan/xoa/{id}(id=${nd.id})}" 
+<a th:href="@{/admin/tai-khoan/xoa/{id}(id=${nd.id})}" 
                                                    class="btn btn-sm btn-light border text-danger"
-                                                   onclick="return confirm('Bạn có chắc chắn muốn xóa tài khoản này?');">
+                                                   th:attr="data-ten=${nd.hoTen != null ? nd.hoTen : 'bệnh nhân'}"
+                                                   onclick="return confirm('Bạn có chắc chắn muốn xóa tài khoản bệnh nhân ' + this.getAttribute('data-ten') + ' này không?');">
                                                     🗑️
                                                 </a>
                                             </td>
@@ -663,77 +666,156 @@
     </div>
 </div>
 
-<!-- ================= MODAL CẤP TÀI KHOẢN BÁC SĨ (ĐOẠN 2) ================= -->
-<div class="modal fade text-start" id="modalCapTaiKhoanBacSi" tabindex="-1" aria-labelledby="modalCapTaiKhoanLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            
-            <form th:action="@{/admin/bac-si/them}" method="post">
-                <div class="modal-header bg-dark text-white">
-                    <h5 class="modal-title fw-bold" id="modalCapTaiKhoanLabel">🩺 Cấp Tài Khoản Bác Sĩ Mới</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                
-                <div class="modal-body p-4">
-                    <p class="text-muted small mb-3">Hệ thống sẽ đồng thời tạo Tài khoản đăng nhập và Hồ sơ Bác sĩ chuyên khoa.</p>
-                    
-                    <!-- 1. Họ và tên bác sĩ -->
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Họ và Tên Bác sĩ <span class="text-danger">*</span></label>
-                        <input type="text" name="hoTen" class="form-control" placeholder="Ví dụ: BS. Nguyễn Văn A" required>
-                    </div>
+<form th:action="@{/admin/cap-tai-khoan-bac-si}" method="post">
 
-                    <!-- 2. Email đăng nhập -->
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Email Đăng Nhập <span class="text-danger">*</span></label>
-                        <input type="email" name="email" class="form-control" placeholder="doctor@gmail.com" required>
-                    </div>
+    <div class="modal-header bg-dark text-white">
+        <h5 class="modal-title fw-bold" id="modalCapTaiKhoanLabel">
+            🩺 Cấp Tài Khoản Bác Sĩ Mới
+        </h5>
 
-                    <!-- 3. Mật khẩu khởi tạo -->
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Mật Khẩu Khởi Tạo <span class="text-danger">*</span></label>
-                        <input type="password" name="matKhau" class="form-control" placeholder="Nhập mật khẩu..." required>
-                    </div>
-
-                    <!-- 4. Số điện thoại -->
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Số Điện Thoại</label>
-                        <input type="text" name="soDienThoai" class="form-control" placeholder="0901234567">
-                    </div>
-
-                    <!-- 5. Phân công Chuyên Khoa -->
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Chuyên Khoa Công Tác <span class="text-danger">*</span></label>
-                        <select name="chuyenKhoaId" class="form-select" required>
-                            <option value="" disabled selected>-- Chọn chuyên khoa --</option>
-                            <option th:each="ck : ${dsChuyenKhoa}" 
-                                    th:value="${ck.id}" 
-                                    th:text="${ck.tenChuyenKhoa}">Nội Khoa</option>
-                        </select>
-                    </div>
-
-                    <!-- 6. Học vị / Chức danh -->
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Học Vị / Chức Danh <span class="text-danger">*</span></label>
-                        <input type="text" name="hocVi" class="form-control" placeholder="Ví dụ: Thạc sĩ, Bác sĩ CKI..." required>
-                    </div>
-
-                    <!-- 7. Mô tả kinh nghiệm -->
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Mô Tả Kinh Nghiệm / Thế Mạnh</label>
-                        <textarea name="moTa" class="form-control" rows="3" placeholder="Mô tả ngắn gọn về chuyên môn..."></textarea>
-                    </div>
-                </div>
-                
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy</button>
-                    <button type="submit" class="btn btn-dark btn-sm fw-bold">➕ Tạo Tài Khoản & Hồ Sơ</button>
-                </div>
-            </form>
-
-        </div>
+        <button type="button"
+                class="btn-close btn-close-white"
+                data-bs-dismiss="modal"
+                aria-label="Close"></button>
     </div>
-</div>
+
+    <div class="modal-body p-4">
+
+        <p class="text-muted small mb-3">
+            Hệ thống sẽ đồng thời tạo tài khoản đăng nhập và hồ sơ bác sĩ chuyên khoa.
+        </p>
+
+        <!-- 1. Tên đăng nhập -->
+        <div class="mb-3">
+            <label class="form-label fw-bold">
+                Tên Đăng Nhập <span class="text-danger">*</span>
+            </label>
+
+            <input type="text"
+                   name="tenDangNhap"
+                   class="form-control"
+                   placeholder="Ví dụ: nguyenvana"
+                   required>
+        </div>
+
+        <!-- 2. Họ và tên -->
+        <div class="mb-3">
+            <label class="form-label fw-bold">
+                Họ và Tên Bác Sĩ <span class="text-danger">*</span>
+            </label>
+
+            <input type="text"
+                   name="hoTen"
+                   class="form-control"
+                   placeholder="Ví dụ: Nguyễn Văn A"
+                   required>
+        </div>
+
+        <!-- 3. Email -->
+        <div class="mb-3">
+            <label class="form-label fw-bold">
+                Email <span class="text-danger">*</span>
+            </label>
+
+            <input type="email"
+                   name="email"
+                   class="form-control"
+                   placeholder="doctor@gmail.com"
+                   required>
+        </div>
+
+        <!-- 4. Mật khẩu -->
+        <div class="mb-3">
+            <label class="form-label fw-bold">
+                Mật Khẩu Khởi Tạo <span class="text-danger">*</span>
+            </label>
+
+            <input type="password"
+                   name="matKhau"
+                   class="form-control"
+                   placeholder="Nhập mật khẩu..."
+                   minlength="6"
+                   required>
+        </div>
+
+        <!-- 5. Số điện thoại -->
+        <div class="mb-3">
+            <label class="form-label fw-bold">
+                Số Điện Thoại
+            </label>
+
+            <input type="text"
+                   name="soDienThoai"
+                   class="form-control"
+                   placeholder="0901234567">
+        </div>
+
+        <!-- 6. Chuyên khoa -->
+        <div class="mb-3">
+            <label class="form-label fw-bold">
+                Chuyên Khoa Công Tác <span class="text-danger">*</span>
+            </label>
+
+            <select name="chuyenKhoaId"
+                    class="form-select"
+                    required>
+
+                <option value="" disabled selected>
+                    -- Chọn chuyên khoa --
+                </option>
+
+                <option th:each="ck : ${dsChuyenKhoa}"
+                        th:value="${ck.id}"
+                        th:text="${ck.tenChuyenKhoa}">
+                    Nội Khoa
+                </option>
+
+            </select>
+        </div>
+
+        <!-- 7. Học vị -->
+        <div class="mb-3">
+            <label class="form-label fw-bold">
+                Học Vị / Chức Danh <span class="text-danger">*</span>
+            </label>
+
+            <input type="text"
+                   name="hocVi"
+                   class="form-control"
+                   placeholder="Ví dụ: Thạc sĩ, Bác sĩ CKI..."
+                   required>
+        </div>
+
+        <!-- 8. Mô tả -->
+        <div class="mb-3">
+            <label class="form-label fw-bold">
+                Mô Tả Kinh Nghiệm / Thế Mạnh
+            </label>
+
+            <textarea name="moTa"
+                      class="form-control"
+                      rows="3"
+                      placeholder="Mô tả ngắn gọn về chuyên môn..."></textarea>
+        </div>
+
+    </div>
+
+    <div class="modal-footer bg-light">
+
+        <button type="button"
+                class="btn btn-secondary btn-sm"
+                data-bs-dismiss="modal">
+            Hủy
+        </button>
+
+        <button type="submit"
+                class="btn btn-dark btn-sm fw-bold">
+            ➕ Tạo Tài Khoản & Hồ Sơ
+        </button>
+
+    </div>
+
+</form>
 
 <!-- Script xử lý Lọc & Tìm kiếm độc lập 2 Tab -->
 <script>
@@ -805,14 +887,28 @@ document.addEventListener("DOMContentLoaded", function () {
                 el.classList.remove('active', 'show');
             });
 
-            // Mở tab được lưu
+            // Mở tab được lưu (tab cha)
             let tabInstance = new bootstrap.Tab(tabTrigger);
             tabInstance.show();
 
-            // Hiển thị nội dung Tab
+            // Hiển thị nội dung Tab cha
             let targetContent = document.querySelector(activeHash);
             if (targetContent) {
                 targetContent.classList.add('active', 'show');
+            }
+
+            // Nếu tab cha là "Quản Lý Tài Khoản" thì tự động mở sẵn tab con "Tài Khoản Bệnh Nhân"
+            // để Admin đứng ngay tại danh sách bệnh nhân, không cần bấm lại.
+            if (activeHash === "#tab-taikhoan") {
+                let innerTab = document.querySelector('#pills-benhnhan-tab');
+                if (innerTab) {
+                    let innerInstance = new bootstrap.Tab(innerTab);
+                    innerInstance.show();
+                }
+                let innerContent = document.querySelector('#pills-benhnhan');
+                if (innerContent) {
+                    innerContent.classList.add('active', 'show');
+                }
             }
         }
     }

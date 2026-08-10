@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Phòng Khám Đa Khoa An Tâm</title>
@@ -229,30 +230,7 @@
 </head>
 
 <body>
-<!-- COZE CHATBOT -->
-<script src="https://sf-cdn.coze.com/obj/unpkg-va/flow-platform/chat-app-sdk/1.2.0-beta.6/libs/oversea/index.js"></script>
 
-<script>
-  new CozeWebSDK.WebChatClient({
-    config: {
-      bot_id: '7670476919168073733'
-    },
-
-    componentProps: {
-      title: 'Trợ lý phòng khám An Tâm'
-    },
-
-    auth: {
-      type: 'token',
-
-      token: 'pat_4m7BAFzeCPukxRqZdJoRApxIcfD7VfJOJwawH1wqMu1h9nCREX7hyAXVyyxhD7Vp',
-
-      onRefreshToken: function () {
-        return 'pat_4m7BAFzeCPukxRqZdJoRApxIcfD7VfJOJwawH1wqMu1h9nCREX7hyAXVyyxhD7Vp';
-      }
-    }
-  });
-</script>
     <header>
         <div class="top-bar">
             <div class="logo-section">
@@ -374,7 +352,7 @@
            th:href="@{'/chuyen-khoa/' + ${ck.maKhoa}}" 
            class="khoa-item" 
            style="text-decoration: none;">
-            <div class="khoa-icon">🩺</div>
+            
             <strong th:text="${ck.tenChuyenKhoa}">Tên Chuyên Khoa</strong>
             <p th:text="${ck.moTa}">Mô tả chuyên khoa...</p>
         </a>
